@@ -1,0 +1,62 @@
+{% extends 'reparado/layouts/nueva_base.html' %}
+
+{% load static %}
+
+{% block titulo %}Usuarios{% endblock %}
+
+{% block principal %}
+
+<section class="container mt-3">
+    <h3>Información Usuarios</h3>
+    <table id="dataTable" class="table user-list table-bordered table-hover">
+        <thead>
+        <tr>
+            <th><span>Id Usuario</span></th>
+            <th><span>User</span></th>
+            <th><span>Fecha Nacimiento</span></th>
+            <th><span>Email</span></th>
+            <th>Opciones</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        {% for u in data %}
+        <tr>
+            <td>
+                {{ u.id }}
+            </td>
+            <td>
+                <img src="{{ u.foto.url }}" alt=""/>
+                <a class="user-link">{{ u.nombre }} {{ u.apellido }}</a>
+                <span class="user-subhead">{{ u.get_rol_display }}</span>
+            </td>
+            <td>{{ u.fecha_nacimiento|date:"d/m/Y" }}</td>
+            <td><a href="" >{{ u.email }}</a></td>
+            <td>
+                {% if request.session.logueo.rol == "ADMIN" %}
+                <button type="button" class="btn btn-dark" 
+                    onclick="modal(`{% url 'usuarios_visualizar' u.id %}`)">
+                    <i class="bi bi-eye"></i>
+                </button>
+                <button class="btn btn-ligth"
+                        onclick="modal(`{% url 'usuarios_editar' u.id %}`)">
+                    <i class="bi bi-pencil-square"></i>
+                </button>
+                <button class="btn btn-danger"
+                        onclick="modal(`{% url 'usuarios_eliminar' u.id %}`)">
+                    <i class="bi bi-trash3"></i>
+                </button>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% if request.session.logueo.rol == "ADMIN" %}
+    <br>
+    <a class="btn btn-primary" href="{% url 'usuarios_crear' %}">Crear nuevo Usuario</a>
+    <br><br>
+    {% endif %}
+</section>
+
+{% endblock %}

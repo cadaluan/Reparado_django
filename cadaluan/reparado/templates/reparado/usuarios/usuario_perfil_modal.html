@@ -1,0 +1,46 @@
+
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasRightLabel">Detalles del Usuario</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <div class="text-center">
+                <img src="{{ usuario.foto.url }}" alt="Usuario" class="img-thumbnail" />
+            </div>
+            <h5 class="text-center">{{ usuario.nombre }} {{ usuario.apellido }}</h5>
+            <p class="text-center">{{ usuario.get_rol_display }}</p>
+            <table class="table">
+                <tr>
+                    <td>Fecha de Nacimiento</td>
+                    <td>{{ usuario.fecha_nacimiento|date:"d/m/Y" }}</td>
+                </tr>
+                <tr>
+                    <td>Estado</td>
+                    <td>
+                        {% if usuario.activo %}
+                            <span class="badge bg-success">Activo</span>
+                        {% else %}
+                            <span class="badge bg-danger">Inactivo</span>
+                            <p class="text-muted">Este usuario está actualmente inactivo.</p>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Correo</td>
+                    <td><a href="mailto:{{ usuario.email }}">{{ usuario.email }}</a></td>
+                </tr>
+                <tr>
+                    <td>Dirección</td>
+                    <td>{{ usuario.direccion }}</td>
+                </tr>
+                <tr>
+                    <td>Celular</td>
+                    <td>{{ usuario.telefono }}</td>
+                </tr>
+            </table>
+            <div class="d-flex justify-content-center">
+                <a class="btn btn-primary me-2" onclick="modal(`{% url 'cambiar_clave' %}`)">Cambiar contraseña</a>
+                <a onclick="modal(`{% url 'usuarios_editar' usuario.id %}`)" class="btn btn-secondary me-2">Editar Perfil</a>
+                <a href="{% url 'logout' %}" class="btn btn-dark me-2">Cerrar Sesión</a>
+            </div>
+        </div>

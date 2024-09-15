@@ -1,0 +1,25 @@
+{% extends 'reparado/layouts/nueva_base.html' %}
+
+{% block principal %}
+<section class="container mt-3">
+    <h1>Detalle de Compra y Factura</h1>
+
+    <h2>Compra</h2>
+    <p><strong>ID de Compra:</strong> {{ compra.id }}</p>
+    <p><strong>Usuario:</strong> {{ compra.usuario }}</p>
+    <p><strong>Fecha:</strong> {{ compra.fecha }}</p>
+    <p><strong>Estado:</strong> {{ compra.get_estado_display }}</p>
+
+    <h2>Factura</h2>
+    <p><strong>ID de Factura:</strong> {{ factura.id }}</p>
+    <p><strong>ID de Compra:</strong> {{ factura.compra }}</p>
+    <p><strong>Fecha de Emisión:</strong> {{ factura.fecha_emision }}</p>
+    <p><strong>Total:</strong> ${{ factura.total }}</p>
+    <p><strong>Método de Pago:</strong> {{ factura.get_metodo_pago_display }}</p>
+    <p><strong>Forma de Pago:</strong> {{ factura.get_forma_pago_display }}</p>
+    <p><strong>Fecha de Pago:</strong> {{ factura.fecha_pago }}</p>
+
+    <a class="btn btn-primary" href="{% url 'inicio' %}">Volver al Inicio</a>
+    <br><br>
+</section>
+{% endblock %}

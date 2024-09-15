@@ -1,0 +1,57 @@
+{% extends 'reparado/layouts/nueva_base.html' %}
+
+{% load static %}
+
+{% block titulo %}Categorías{% endblock %}
+
+{% block principal %}
+
+<section class="container mt-3">
+    <h3>Información Categorías</h3>
+    <table id="dataTable" class="table user-list table-bordered table-hover">
+        <thead>
+        <tr>
+            <th>ID Categoría</th>
+            <th>Nombre de la Categoría</th>
+            <th>Descripción</th>
+            {% if request.session.logueo.rol == "ADMIN" %}
+            <th>Opciones</th>
+            {% endif %}
+        </tr>
+        </thead>
+        <tbody>
+        {% for categoria in data %}
+        <tr>
+            <td>{{ categoria.id }}</td>
+            <td>{{ categoria.nombre_cat }}</td>
+            <td>{{ categoria.desc }}</td>
+            {% if request.session.logueo.rol == "ADMIN" %}
+            <td>
+                <button class="btn btn-ligth btnEditarCategoria"
+                        onclick="modal(`{% url 'categorias_editar' categoria.id %}`)">
+                    <i class="bi bi-pencil-square"></i>
+                </button>
+
+                <button class="btn btn-danger btnEliminarCategoria"
+                        onclick="modal(`{% url 'categorias_eliminar' categoria.id %}`)">
+                    <i class="bi bi-trash3"></i>
+                </button>
+            </td>
+            {% endif %}
+        </tr>
+
+        {% endfor %}
+        </tbody>
+    </table>
+    {% if request.session.logueo.rol == "ADMIN" %}
+    <br>
+    <a class="btn btn-primary" href="{% url 'categorias_crear' %}">Crear nueva Categoría</a>
+    <br><br>
+    {% endif %}
+</section>
+
+{% endblock %}
+
+
+
+

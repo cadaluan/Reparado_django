@@ -1,0 +1,48 @@
+<div class="modal-dialog modal-dialog-centered">
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+            <h5 class="modal-title" id="registrarseModalLabel">Registrarse</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+
+        <div class="modal-body">
+            <!-- Contenido del formulario de registro con información adicional-->
+
+            <form method="post" enctype="multipart/form-data" action="{% url 'registro' %}">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username:</label>
+                    <input type="text" class="form-control" id="username" name="username" required aria-label="Apellido"/>
+                </div>
+
+                <div class="mb-3">
+                    <label for="password1" class="form-label">Contraseña:</label>
+                    <input type="password" class="form-control" id="password1" name="password1" required aria-label="Contraseña"/>
+                </div>
+
+                <div class="mb-3">
+                    <label for="password2" class="form-label">Confirmar Contraseña:</label>
+                    <input type="password" class="form-control" id="password2" name="password2" required
+                           aria-label="Confirmar Contraseña"/>
+                </div>
+
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="aceptar-terminos" required
+                           aria-label="Acepto los términos y condiciones"/>
+                    <label class="form-check-label" for="aceptar-terminos">Acepto los términos y condiciones</label>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Registrarse</button>
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>

@@ -1,0 +1,46 @@
+{% extends 'reparado/layouts/nueva_base.html' %}
+
+{% block principal %}
+<section class="container mt-3">
+<h1>Detalle de Compras y Facturas</h1>
+
+    {% if compras %}
+        <h2>Compras</h2>
+        <ul>
+            {% for compra in compras %}
+                <li>
+                    <strong>ID de Compra:</strong> {{ compra.id }}<br>
+                    <strong>Fecha:</strong> {{ compra.fecha }}<br>
+                    <strong>Estado:</strong> {{ compra.get_estado_display }}<br>
+
+                    {% if facturas %}
+                        <h3>Facturas asociadas:</h3>
+                        <ul>
+                            {% for factura in facturas %}
+                                {% if factura.compra_id == compra.id %}
+                                    <li>
+                                        <strong>ID de Factura:</strong> {{ factura.id }}<br>
+                                        <strong>Fecha de Emisión:</strong> {{ factura.fecha_emision }}<br>
+                                        <strong>Total:</strong> ${{ factura.total }}<br>
+                                        <strong>Método de Pago:</strong> {{ factura.get_metodo_pago_display }}<br>
+                                        <strong>Forma de Pago:</strong> {{ factura.get_forma_pago_display }}<br>
+                                        <strong>Fecha de Pago:</strong> {{ factura.fecha_pago }}<br>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No hay facturas asociadas a esta compra.</p>
+                    {% endif %}
+                </li>
+                <hr>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No tienes compras realizadas.</p>
+    {% endif %}
+
+    <a class="btn btn-primary" href="{% url 'inicio' %}">Volver al Inicio</a>
+    <br><br>
+</section>
+{% endblock %}
