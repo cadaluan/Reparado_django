@@ -1,0 +1,66 @@
+{% load static %}
+<!-- Editar Modal -->
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Editar Usuario</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <form action="{% url 'usuarios_editar' usuario.id %}" method="post">
+                {% csrf_token %}
+                <!--<input type="hidden" id="servicio_id" name="servicio_id" value="{{ servicio.id }}" />-->
+
+                <div class="mb-3">
+                    <label for="nombre" class="form-label">Nombre del Usuario:</label>
+                    <input type="text" class="form-control" id="nombre" name="nombre" value="{{ usuario.nombre }}" />
+                </div>
+                <div class="mb-3">
+                    <label for="apellido" class="form-label">Apellido del Usuario:</label>
+                    <input type="text" class="form-control" id="apellido" name="apellido" value="{{ usuario.apellido }}" />
+                </div>
+                {% if request.session.logueo.rol == "ADMIN" %}
+                <div class="mb-3">
+                    <label>Rol </label>
+                    <select name="rol" class="form-control" required="">
+                        <option value="">Seleccione:</option>
+                        {% for rol_value, rol_display in roles %}
+                            <option value="{{ rol_value }}" {% if usuario.rol == rol_value %} selected {% endif %}>{{ rol_display }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+                <div class="mb-3">
+                    <label for="email" class="form-label">Correo del Usuario:</label>
+                    <input type="email" class="form-control" id="email" name="email" value="{{ usuario.email }}" />
+                </div>
+                <div class="mb-3">
+                    <label for="fecha_nacimiento" class="form-label">Fecha de Nacimiento:</label>
+                    <input type="date" class="form-control" id="fecha_nacimiento" name="fecha_nacimiento" value="{{ usuario.fecha_nacimiento|date:'Y-m-d' }}" />
+                </div>
+                <div class="mb-3">
+                    <label for="direccion" class="form-label">Dirección del Usuario:</label>
+                    <input type="text" class="form-control" id="direccion" name="direccion" value="{{ usuario.direccion }}" />
+                </div>
+                <div class="mb-3">
+                    <label for="telefono" class="form-label">Teléfono del Usuario:</label>
+                    <input type="number" class="form-control" id="telefono" name="telefono" value="{{ usuario.telefono }}" />
+                </div>
+                {% if request.session.logueo.rol == "ADMIN" %}
+                <div class="mb-3">
+                    <label for="categorias" class="form-label">Categorías:</label>
+                    <select name="categorias" id="categorias" class="form-control" multiple>
+                        {% for categoria in categorias %}
+                            <option value="{{ categoria.id }}" {% if categoria in usuario.categorias.all %} selected {% endif %}>{{ categoria.nombre_cat }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

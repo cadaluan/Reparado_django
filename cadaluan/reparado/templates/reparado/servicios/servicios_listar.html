@@ -1,0 +1,60 @@
+{% extends 'reparado/layouts/nueva_base.html' %}
+{% load static %}
+{% load humanize %}
+{% block titulo %}Servicios{% endblock %}
+{% block principal %}
+
+<section class="container mt-3">
+    <h3>Información Servicios</h3>
+    <table id="dataTable" class="table user-list table-bordered table-hover">
+        <thead>
+        <tr>
+            <th>ID Servicio</th>
+            <th>Nombre del Servicio</th>
+            <th>Categoría</th>
+            <th>Precio(Hora)</th>
+            <th>Opciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for r in data %}
+        <tr>
+            <td>{{ r.id }}</td>
+            <td>{{ r.nombre_ser }}</td>
+            <td>{{ r.categoria }}</td>
+            <td>${{ r.precio | intcomma }}</td>
+            <td>
+
+            <input type="hidden" value="{{ r.id }}" name="id_servicio" id="id_servicio_{{ r.id }}">
+            {% if request.session.logueo.rol == "ADMIN" %}
+            <button class="btn btn-ligth btnEditarCategoria"
+                    onclick="modal(`{% url 'servicios_editar' r.id %}`)">
+                <i class="bi bi-pencil-square"></i>
+            </button>
+
+            <button class="btn btn-danger btnEliminarCategoria"
+                    onclick="modal(`{% url 'servicios_eliminar' r.id %}`)">
+                <i class="bi bi-trash3"></i>
+            </button>
+            {% endif %}
+            <!-- <button onclick="add_carrito(`{% url 'carrito_add' %}`, {{ r.id }})"
+                    type="button" class="btn btn-dark">
+                <i class="bi bi-bag"></i>
+            </button> -->
+            <button type="button" class="btn btn-info"
+                    onclick="modal(`{% url 'solicitud_servicio' r.id %}`)">
+                <i class="bi bi-calendar2-day"></i>
+            </button>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% if request.session.logueo.rol == "ADMIN" %}
+    <br>
+    <a class="btn btn-primary" href="{% url 'servicios_crear' %}">Crear Servicio</a>
+    <br><br>
+    {% endif %}
+</section>
+
+{% endblock %}
