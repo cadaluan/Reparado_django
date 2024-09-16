@@ -1,26 +1,17 @@
-"""
-URL configuration for cadaluan project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
+# Importación de módulos necesarios para el enrutamiento y la configuración de archivos estáticos
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+# Lista de rutas de URL del proyecto
 urlpatterns = [
-                  path('admin/', admin.site.urls),
-                  path('', include('reparado.urls')),
-                  #path('api-auth/', include('rest_framework.urls')),
-              ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # Ruta para la interfaz administrativa de Django
+    path('admin/', admin.site.urls),
+
+    # Ruta para incluir las URL definidas en el archivo urls.py de la aplicación 'reparado'
+    path('', include('reparado.urls')),
+]
+
+# Configuración para servir archivos multimedia durante el desarrollo
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
