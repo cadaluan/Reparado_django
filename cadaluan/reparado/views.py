@@ -1,27 +1,31 @@
 import json
 from datetime import datetime
 from random import randint
-from .models import *
+
 from django.conf import settings
 from django.contrib import messages
 from django.core.mail import BadHeaderError, EmailMessage
+from django.core.paginator import Paginator
+from django.core.files.storage import default_storage
 from django.db import transaction
 from django.db.models import F, ExpressionWrapper, DateTimeField, DurationField
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseServerError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils import timezone
 from django.views.decorators.http import require_GET, require_http_methods
+
 from rest_framework import viewsets, generics, status
-
-from .encriptar import *
-from .forms import *
-from .serializers import *
-
 from rest_framework.authtoken.views import ObtainAuthToken, APIView
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
+
+from .models import *
+from .encriptar import *
+from .forms import *
+from .serializers import *
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
@@ -35,7 +39,6 @@ def calendario(request):
     if logueo:
         sol = Solicitud.objects.all()
         solicitudes_realizadas = []
-
         for item in sol:
             tiempo_estimado = item.servicio.tiempo_estimado
             end_time = item.fecha_hora + timedelta(minutes=tiempo_estimado)
@@ -44,7 +47,6 @@ def calendario(request):
                 "start": item.fecha_hora.strftime("%Y-%m-%d %H:%M:%S"),
                 "end": end_time.strftime("%Y-%m-%d %H:%M:%S"),
             })
-
         context = {"solicitudes": json.dumps(solicitudes_realizadas)}
         return render(request, "reparado/calendario/calendario.html", context)
     else:
@@ -54,21 +56,24 @@ def calendario(request):
 
 def index(request):
     logueo = request.session.get("logueo", False)
+    print(f"Index - logueo: {logueo}")  # <-- Agregar para ver el valor de la sesión
     if logueo:
-        return redirect("inicio")  # direcciona a la vista llamada inicio
-    else:
-        return render(request, "reparado/layouts/nuevo_login.html")
+        return redirect("inicio")
+    return render(request, "reparado/layouts/nuevo_login.html")
 
 
 def login(request):
     if request.method == "POST":
-        username = request.POST.get("username")
+        email = request.POST.get("email")
         password = request.POST.get("password")
+
+        if not email or not password:
+            messages.error(request, "Email y contraseña son requeridos.")
+            return redirect("index")
+
         try:
-            q = Usuario.objects.get(username=username)
-            verify = verify_password(password, q.password)
-            if verify:
-                messages.success(request, f"Bienvenido {q.username}")
+            q = Usuario.objects.get(email=email)
+            if verify_password(password, q.password):
                 # Crear la sesión...
                 request.session["logueo"] = {
                     "id": q.id,
@@ -76,25 +81,38 @@ def login(request):
                     "rol": q.rol,
                     "username": q.username,
                 }
+                print(
+                    f"Login - logueo set: {request.session['logueo']}")  # <-- Verificar que la sesión se establece correctamente
                 request.session["carrito"] = []
                 request.session["items_carrito"] = 0
                 request.session["total_carrito"] = 0
+                messages.success(request, f"Bienvenido {q.username}")
                 return redirect("inicio")
             else:
-                raise Exception(verify)
-        except Exception as e:
-            messages.error(request, f"Usuario o contraseña no válidos... {e}")
-            return redirect("index")
-    else:
-        messages.warning(request, "No se enviaron datos...")
+                messages.error(request, "Contraseña incorrecta.")
+        except Usuario.DoesNotExist:
+            messages.error(request, "El usuario no existe.")
+
         return redirect("index")
+    messages.warning(request, "No se enviaron datos.")
+    return redirect("index")
 
 
 def inicio(request):
-    logueo = request.session.get("logueo", False)
-    if logueo:
+    logueo = request.session.get("logueo")
+    print(f"Inicio - logueo: {logueo}")  # Debug para ver el estado de la sesión
+    if not logueo or not isinstance(logueo, dict):
+        # Si no hay logueo o si no es un diccionario válido, redirige al índice
+        return redirect("index")
+
+    if logueo.get("rol") == "ADMIN" or logueo.get("rol") == "TEC":
+        print("Redirigiendo al home para ADMIN o TEC")
         return render(request, "reparado/home/index.html")
+    elif logueo.get("rol") == "CLI":
+        print("Redirigiendo a la vista de servicios para CLI")
+        return redirect("servicios")
     else:
+        # En caso de un rol inválido, redirige al índice
         return redirect("index")
 
 
@@ -115,7 +133,7 @@ def cambiar_clave(request):
     logueo = request.session.get("logueo", False)
     if logueo:
         if request.method == "GET":
-            return render(request, "reparado/usuarios/cambiar_contraseña.html")
+            return render(request, "reparado/usuarios/cambiar_contrasena.html")
         elif request.method == "POST":
             # capturo la clave actual del formulario
             old_password = request.POST.get("old_password")
@@ -218,42 +236,31 @@ def handle_uploaded_file(f):
 def registro(request):
     if request.method == 'GET':
         return render(request, 'reparado/usuarios/registro.html')
-
     elif request.method == 'POST':
-        username = request.POST.get("username").strip()
+        email = request.POST.get("email").strip()
         password1 = request.POST.get("password1").strip()
         password2 = request.POST.get("password2").strip()
-
         # Validaciones
-        if not username or not password1 or not password2:
+        if not email or not password1 or not password2:
             messages.error(request, "Los campos no pueden estar vacíos")
             return redirect("index")
-
-        if Usuario.objects.filter(username=username).exists():
-            messages.error(request, "Username ya existe")
+        if Usuario.objects.filter(email=email).exists():
+            messages.error(request, "Email ya existe")
             return redirect("index")
-
-        pattern = r'^(?!.*\.\.)(?!.*[&=_\'\-+,<>])([a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*)$'
-        if not re.match(pattern, username):
-            messages.error(request, 'El nombre de usuario no es válido. Solo se permiten letras, números y puntos (.). '
-                                    'No se permiten dos puntos consecutivos ni los siguientes caracteres: & = _ \' - '
-                                    '+ , < >')
-
+        pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+        if not re.match(pattern, email):
+            messages.error(request, 'El correo electrónico no es válido.')
+            return redirect("index")
         if password1 != password2:
             messages.warning(request, "Las contraseñas no coinciden")
             return redirect("index")
-
         clave = hash_password(password1)
-
         q = Usuario(
-            username=username,
+            email=email,
             password=clave,
         )
-
         q.save()
-
         messages.success(request, "Registro exitoso!")
-
         request.session["logueo"] = {
             "id": q.id,
             "username": q.username,
@@ -406,14 +413,41 @@ def categorias_eliminar(request, id_categoria):
 
 
 def servicios(request):
-    logueo = request.session.get("logueo", False)
-    q = Servicio.objects.all()
-    context = {"data": q}
-    if logueo:
-        return render(request, "reparado/servicios/servicios_listar.html", context)
-    else:
+    logueo = request.session.get("logueo")
+    if not logueo:
         messages.error(request, "Debe iniciar sesión.")
         return redirect("index")
+
+    categoria_id = request.GET.get("categoria")
+    orden = request.GET.get("orden")
+
+    # Filtrar servicios
+    servicios = Servicio.objects.all()
+    if categoria_id:
+        servicios = servicios.filter(categoria_id=categoria_id)
+    if orden:
+        servicios = servicios.order_by(orden)
+
+    # Paginación
+    paginator = Paginator(servicios, 6)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'categorias': Categoria.objects.all(),
+        'page_obj': page_obj,
+        'categoria_seleccionada': categoria_id,
+        'orden_seleccionado': orden,
+    }
+
+    rol = logueo.get("rol")
+    if rol == "CLI":
+        return render(request, "reparado/servicios/servicios_listar_clientes.html", context)
+    if rol in ["ADMIN", "TEC"]:
+        return render(request, "reparado/servicios/servicios_listar.html", {'data': servicios})
+
+    messages.error(request, "No tiene permisos para acceder a este módulo.")
+    return redirect("index")
 
 
 def servicios_crear(request):
@@ -493,24 +527,26 @@ def servicios_editar(request, id_servicio):
 
     if request.method == 'GET':
         # Renderiza el formulario con los datos actuales
-        return render(request, 'reparado/servicios/servicio_editar_modal.html', {'servicio': servicio,
-                                                                                 'categorias': cat})
+        return render(request, 'reparado/servicios/servicio_editar_modal.html',
+                      {'servicio': servicio, 'categorias': cat})
+
     elif request.method == 'POST':
         nombre_ser = request.POST.get('nombre_ser', '').strip()
         desc_ser = request.POST.get('desc_ser', '').strip()
         precio = request.POST.get("precio", '').strip()
         categoria = request.POST.get("categorias", '').strip()
+        nueva_imagen = request.FILES.get('foto')  # Obtiene la imagen cargada si existe
 
         # Validaciones
         regex_nombre_desc = r'^(?!.* {2})(?!.*\.\.)(?!.*\s$)[A-Za-zÁÉÍÓÚáéíóúÑñ ,.¡!¿?]*$'
         regex_precio = r'^\d+(\.\d{1,2})?$'  # Permite precios en formato decimal
 
         if not nombre_ser or not re.match(regex_nombre_desc, nombre_ser):
-            messages.error(request, "El nombre del servicio no es válido. No debe contener números ni caracteres "
-                                    "especiales.")
+            messages.error(request,
+                           "El nombre del servicio no es válido. No debe contener números ni caracteres especiales.")
         elif not desc_ser or not re.match(regex_nombre_desc, desc_ser):
-            messages.error(request, "La descripción del servicio no es válida. No debe contener números ni caracteres "
-                                    "especiales.")
+            messages.error(request,
+                           "La descripción del servicio no es válida. No debe contener números ni caracteres especiales.")
         elif not precio or not re.match(regex_precio, precio):
             messages.error(request, "El precio no es válido. Debe ser un número con hasta dos decimales.")
         elif not categoria or not Categoria.objects.filter(pk=categoria).exists():
@@ -522,14 +558,22 @@ def servicios_editar(request, id_servicio):
                 servicio.desc_ser = desc_ser
                 servicio.precio = float(precio)
                 servicio.categoria = Categoria.objects.get(pk=categoria)
+
+                # Si se ha cargado una nueva imagen, la actualizamos
+                if nueva_imagen:
+                    if servicio.foto:  # Elimina la imagen anterior si existe
+                        if default_storage.exists(servicio.foto.name):
+                            default_storage.delete(servicio.foto.name)
+                    servicio.foto = nueva_imagen
+
                 servicio.save()
                 messages.success(request, 'Datos actualizados con éxito!!!')
                 return redirect("servicios")
             except Exception as e:
                 messages.error(request, f"Se produjo un error: {e}")
 
-        return render(request, 'reparado/servicios/servicio_editar_modal.html', {'servicio': servicio,
-                                                                                 'categorias': cat})
+        return render(request, 'reparado/servicios/servicio_editar_modal.html',
+                      {'servicio': servicio, 'categorias': cat})
 
 
 def servicios_eliminar(request, id_servicio):
@@ -860,29 +904,39 @@ def usuarios_editar(request, id_usuario):
         return redirect("index")
 
     if request.method == 'GET':
-        return render(request, 'reparado/usuarios/usuario_editar_modal.html', {'usuario': usuario,
-                                                                               'roles': roles,
-                                                                               'categorias': categorias})
+        return render(request, 'reparado/usuarios/usuario_editar_modal.html', {
+            'usuario': usuario,
+            'categorias': categorias,
+            'roles': roles
+        })
 
     if logueo.get("rol") == "ADMIN" or logueo.get("id") == id_usuario:
         # Extracción y saneamiento de los campos
+        username = request.POST.get('username', '').strip()
         nombre = request.POST.get('nombre', '').strip()
         apellido = request.POST.get('apellido', '').strip()
-        rol = request.POST.get('rol', '').strip()
         email = request.POST.get("email", "").strip()
         fecha_nacimiento = request.POST.get("fecha_nacimiento", "").strip()
         direccion = request.POST.get("direccion", "").strip()
         telefono = request.POST.get("telefono", "").strip()
         categorias_ids = request.POST.getlist("categorias")
-        # Validaciones
+
+        # Solo permite que el administrador modifique el rol
+        if logueo.get("rol") == "ADMIN":
+            rol = request.POST.get('rol', '').strip()
+            usuario.rol = rol
+
+        # Validaciones (igual que antes)
         regex_nombre_apellido = r'^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$'
         regex_email = r'^[\w\.-]+@[\w\.-]+\.\w+$'
-        regex_telefono = r'^\+?\d{9,15}$'  # Permite números de teléfono con o sin código de país
+        regex_telefono = r'^\+?\d{9,15}$'
 
-        if not nombre or not re.match(regex_nombre_apellido, nombre):
-            messages.error(request, "El nombre no es válido. No debe contener números ni caracteres especiales.")
+        if not username or not re.match(regex_nombre_apellido, nombre):
+            messages.error(request, "El username no es válido. No debe contener números ni caracteres especiales.")
+        elif not nombre or not re.match(regex_nombre_apellido, nombre):
+            messages.error(request, "El nombre no es válido.")
         elif not apellido or not re.match(regex_nombre_apellido, apellido):
-            messages.error(request, "El apellido no es válido. No debe contener números ni caracteres especiales.")
+            messages.error(request, "El apellido no es válido.")
         elif not email or not re.match(regex_email, email):
             messages.error(request, "El correo electrónico no es válido.")
         elif not telefono or not re.match(regex_telefono, telefono):
@@ -892,20 +946,28 @@ def usuarios_editar(request, id_usuario):
         else:
             try:
                 # Actualiza los campos del usuario
+                usuario.username = username
                 usuario.nombre = nombre
                 usuario.apellido = apellido
-                usuario.rol = rol
                 usuario.email = email.lower()
                 usuario.fecha_nacimiento = fecha_nacimiento
                 usuario.direccion = direccion
                 usuario.telefono = telefono
+
+                # Si se sube una nueva foto, actualizarla
+                if 'foto' in request.FILES:
+                    foto = request.FILES['foto']
+                    if usuario.foto:
+                        usuario.foto.delete(save=False)
+                    usuario.foto = foto
+
                 usuario.save()
 
                 # Actualiza las categorías
                 usuario.categorias.set(categorias_ids)
 
                 messages.success(request, 'Datos actualizados con éxito!!!')
-                return redirect("usuarios")
+                return redirect("index")
             except Exception as e:
                 messages.error(request, f"Se produjo un error: {e}")
     else:
@@ -1030,48 +1092,67 @@ def guardar_compra(request):
 
     if logueo:
         usuario = Usuario.objects.get(pk=logueo["id"])
-
-        # Supongamos que método de pago y forma de pago se obtienen del request
-        metodo_pago_seleccionado = request.POST.get("metodo_pago", "EFECTIVO")
-        forma_pago_seleccionada = request.POST.get("forma_pago", "CONTADO")
-
         try:
-            # Crear una nueva compra
+            # Crear la compra sin generar la factura aún
             compra = Compra.objects.create(
                 usuario=usuario,
-                estado=1  # Estado predeterminado
-            )
-
-            # Crear la factura relacionada con la compra
-            Factura.objects.create(
-                compra=compra,
                 total=total_carrito,
-                metodo_pago=metodo_pago_seleccionado,
-                forma_pago=forma_pago_seleccionada,
-                fecha_pago=timezone.now()  # O el valor correcto para la fecha de pago
+                estado=1  # Estado "Creado"
             )
 
-            # Limpia el carrito
+            # Limpiar carrito después de guardar
             request.session["carrito"] = []
             request.session["items_carrito"] = 0
-            messages.success(request, "Compra y factura guardadas correctamente.")
+            messages.success(request, "Compra creada correctamente. Ahora puedes proceder al pago.")
             return redirect('detalle_compra', compra_id=compra.id)
+        
         except Exception as e:
             transaction.set_rollback(True)
             messages.error(request, f"Error al guardar la compra: {e}")
     else:
         messages.error(request, "Usuario no autenticado.")
-
+    
     return redirect("inicio")
+
+
+@transaction.atomic
+def procesar_pago(request, compra_id):
+    compra = get_object_or_404(Compra, pk=compra_id)
+
+    if compra.estado != 1:
+        messages.error(request, "Esta compra ya ha sido pagada o está en un estado no válido para el pago.")
+        return redirect('detalle_compra', compra_id=compra.id)
+
+    metodo_pago_seleccionado = request.POST.get("metodo_pago", "EFECTIVO")
+    forma_pago_seleccionada = request.POST.get("forma_pago", "CONTADO")
+
+    try:
+        # Actualizar el estado de la compra a "Pagada" (suponiendo que el estado 2 es "Pagada")
+        compra.estado = 2  # Estado "Pagada"
+        compra.save()
+
+        # Crear la factura ahora que se ha pagado la compra
+        Factura.objects.create(
+            compra=compra,
+            total=compra.total,
+            metodo_pago=metodo_pago_seleccionado,
+            forma_pago=forma_pago_seleccionada,
+            fecha_pago=timezone.now()
+        )
+
+        messages.success(request, "Pago procesado y factura generada correctamente.")
+        return redirect('detalle_compra', compra_id=compra.id)
+    
+    except Exception as e:
+        transaction.set_rollback(True)
+        messages.error(request, f"Error al procesar el pago: {e}")
+        return redirect('detalle_compra', compra_id=compra.id)
 
 
 def detalle_compra(request, compra_id):
     compra = get_object_or_404(Compra, pk=compra_id)
-    factura = get_object_or_404(Factura, compra=compra)
-    contexto = {
-        'compra': compra,
-        'factura': factura
-    }
+    factura = Factura.objects.filter(compra=compra).first()
+    contexto = {'compra': compra, 'factura': factura}
     return render(request, 'reparado/carrito/detalle_compra.html', contexto)
 
 
@@ -1118,7 +1199,6 @@ def enviar_correo(ruta, email, token):
 # ------------------------------- Para los permisos de los end-points -----------------------------
 
 
-
 # Vistas para API
 
 class UsuarioViewSet(viewsets.ModelViewSet):
@@ -1143,33 +1223,12 @@ class ServicioViewSet(viewsets.ModelViewSet):
 class SolicitudViewSet(viewsets.ModelViewSet):
     # permission_classes = [IsAuthenticated]
     queryset = Solicitud.objects.all()
-    print(queryset)
     serializer_class = SolicitudSerializer
-
-
-
-class ComentarioViewSet(viewsets.ModelViewSet):
-    queryset = Comentario.objects.all()
-    serializer_class = ComentarioSerializer
-
-
-"""class AuditoriaViewSet(viewsets.ModelViewSet):
-    queryset = Auditoria.objects.all()
-    serializer_class = AuditoriaSerializer"""
 
 
 class FacturaViewSet(viewsets.ModelViewSet):
     queryset = Factura.objects.all()
     serializer_class = FacturaSerializer
-
-
-"""class MetodoPagoViewSet(viewsets.ModelViewSet):
-    queryset = MetodoPago.objects.all()
-    serializer_class = MetodoPagoSerializer"""
-
-"""class FacturaPagoViewSet(viewsets.ModelViewSet):
-    queryset = FacturaPago.objects.all()
-    serializer_class = FacturaPagoSerializer"""
 
 
 class ServicioFiltroCategoria(generics.ListAPIView):
@@ -1180,11 +1239,10 @@ class ServicioFiltroCategoria(generics.ListAPIView):
         cat = self.kwargs['categorias']
         # tema_obj = Tema.objects.get(pk=tema)
         return Servicio.objects.filter(categoria=cat).order_by('-nombre_ser')
-    
+
+
 class RegisterView(APIView):
     def post(self, request, *args, **kwargs):
-        
-        
         print(request.data)
 
         serializer = UserSerializer(data=request.data)

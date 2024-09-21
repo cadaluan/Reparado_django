@@ -138,3 +138,43 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 });
+
+const toggleButton = document.getElementById('toggle-dark-mode');
+const icon = toggleButton.querySelector('i');
+const darkModeEnabled = localStorage.getItem('dark-mode') === 'true';
+const htmlElement = document.documentElement; // Selecciona el elemento <html>
+
+// Función para actualizar el ícono según el modo
+const updateIcon = (isDarkMode) => {
+    if (isDarkMode) {
+        icon.classList.replace('bi-moon', 'bi-sun'); // Modo oscuro activo
+    } else {
+        icon.classList.replace('bi-sun', 'bi-moon'); // Modo claro activo
+    }
+};
+
+// Función para cambiar el modo oscuro
+const toggleDarkMode = (isDarkMode) => {
+    document.body.classList.toggle('dark-mode', isDarkMode); // Aplica o remueve la clase
+    localStorage.setItem('dark-mode', isDarkMode); // Guarda la preferencia en localStorage
+
+    // Cambiar el atributo del tema en el elemento <html>
+    if (isDarkMode) {
+        htmlElement.setAttribute('data-bs-theme', 'dark');
+    } else {
+        htmlElement.removeAttribute('data-bs-theme');
+    }
+
+    updateIcon(isDarkMode); // Actualiza el ícono según el estado
+};
+
+// Inicializa el modo oscuro si está habilitado
+if (darkModeEnabled) {
+    toggleDarkMode(true);
+}
+
+// Evento al hacer clic en el botón de cambio de modo
+toggleButton.addEventListener('click', () => {
+    const isDarkMode = !document.body.classList.contains('dark-mode'); // Invertir estado actual
+    toggleDarkMode(isDarkMode);
+});

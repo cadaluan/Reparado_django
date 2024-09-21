@@ -36,11 +36,10 @@ class Usuario(AbstractUser):
 
     ROLES = (
         ("ADMIN", "Administrador"),
-        ("SEC", "Secretaria"),
         ("TEC", "Técnico"),
-        ("USU", "Usuario"),
+        ("CLI", "Cliente"),
     )
-    rol = models.CharField(max_length=5, choices=ROLES, default="USU", null=True, blank=True)
+    rol = models.CharField(max_length=5, choices=ROLES, default="CLI", null=True, blank=True)
     categorias = models.ManyToManyField(Categoria, blank=True)
 
     def __str__(self):
@@ -70,11 +69,17 @@ class Solicitud(models.Model):
     servicio = models.ForeignKey(Servicio, on_delete=models.CASCADE)
     fecha_hora = models.DateTimeField()
     precio = models.IntegerField()
-    tiempo_estimado = models.IntegerField(default=120)  # Tiempo en minutos
+    tiempo_estimado = models.IntegerField(default=120)
     zona = models.CharField(max_length=200)
     usuario = models.ForeignKey('Usuario', on_delete=models.DO_NOTHING, related_name='solicitudes_usuario')
-    tecnico = models.ForeignKey('Usuario', on_delete=models.DO_NOTHING, related_name='solicitudes_tecnico', blank=True,
-                                null=True)
+    tecnico = models.ForeignKey(
+        'Usuario',
+        on_delete=models.DO_NOTHING,
+        related_name='solicitudes_tecnico',
+        blank=True,
+        null=True,
+        limit_choices_to={'rol': 'TEC'}  # Solo técnicos
+    )
 
     ESTADOS = [
         ("EN_ESPERA", 'En espera'),
@@ -100,64 +105,28 @@ class Solicitud(models.Model):
         verbose_name_plural = "Solicitud"
 
 
-class Comentario(models.Model):
-    solicitud = models.ForeignKey(Solicitud, on_delete=models.CASCADE)
-    estado = models.CharField(max_length=200)
-    comentario = models.CharField(max_length=254)
-    estrellas = models.IntegerField()
-    objects = models.Manager()
-
-    def __str__(self):
-        return f"Comentario para Solicitud {self.solicitud}"
-
-    class Meta:
-        verbose_name_plural = "Comentario"
-
-
 class Compra(models.Model):
     usuario = models.ForeignKey(Usuario, on_delete=models.DO_NOTHING)
     fecha = models.DateTimeField(auto_now_add=True)
-    ESTADO = [
-        (1, "Creado"),
-        (2, "Enviado"),
-        (3, "Cancelado"),
-    ]
-    estado = models.IntegerField(choices=ESTADO, default=1, blank=True)
-    objects = models.Manager()
+    total = models.DecimalField(max_digits=10, decimal_places=2)  # Agregado para guardar el total
+    ESTADO = [(1, "Creado"), (2, "Pagada"), (3, "Enviada"), (4, "Cancelada")]
+    estado = models.SmallIntegerField(choices=ESTADO, default=1, blank=True)
 
     def __str__(self):
         return f"{self.id} - {self.usuario}"
 
-    class Meta:
-        verbose_name_plural = "Compras"
-
 
 class Factura(models.Model):
-    METODOS_PAGO = [
-        ("EFECTIVO", "Efectivo"),
-        ("TARJETA_DEBITO", "Tarjeta de débito"),
-        ("TARJETA_CREDITO", "Tarjeta de crédito"),
-        ("TRANSFERENCIA_BANCARIA", "Transferencia bancaria"),
-        ("PAYPAL", "PayPal"),
-        ("CHEQUE", "Cheque"),
-    ]
-
-    FORMAS_PAGO = [
-        ("CONTADO", "Pago al contado"),
-        ("CREDITO", "Pago mediante crédito"),
-        ("DEBITO_AUTOMATICO", "Pago mediante débito automático"),
-        ("TRANSFERENCIA_BANCARIA", "Pago mediante transferencia bancaria"),
-        ("TARJETA_CREDITO", "Pago con tarjeta de crédito"),
-        ("TARJETA_DEBITO", "Pago con tarjeta de débito"),
-    ]
-
-    compra = models.ForeignKey(Compra, on_delete=models.CASCADE)
+    METODOS_PAGO = [("EFECTIVO", "Efectivo"), ("TARJETA_CREDITO", "Tarjeta de crédito")]
+    FORMAS_PAGO = [("CONTADO", "Pago al contado"), ("CREDITO", "Pago mediante crédito")]
+    compra = models.OneToOneField(Compra, on_delete=models.CASCADE)
     fecha_emision = models.DateField(default=timezone.now)
-    total = models.IntegerField()
+    total = models.DecimalField(max_digits=10, decimal_places=2)
     metodo_pago = models.CharField(max_length=50, choices=METODOS_PAGO, default="EFECTIVO")
     forma_pago = models.CharField(max_length=50, choices=FORMAS_PAGO, default="CONTADO")
     fecha_pago = models.DateField(default=timezone.now)
-    objects = models.Manager()
 
-    class Meta:
-        verbose_name_plural = "Facturas"
+    def __str__(self):
+        return f"Factura {self.id} para Compra {self.compra.id}"
+
+

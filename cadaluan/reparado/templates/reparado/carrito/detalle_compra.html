@@ -1,25 +1,67 @@
 {% extends 'reparado/layouts/nueva_base.html' %}
 
 {% block principal %}
-<section class="container mt-3">
-    <h1>Detalle de Compra y Factura</h1>
+<!-- <section class="container mt-3">
+    <h1 class="text-center">Detalle de Compra y Factura</h1>
 
-    <h2>Compra</h2>
-    <p><strong>ID de Compra:</strong> {{ compra.id }}</p>
-    <p><strong>Usuario:</strong> {{ compra.usuario }}</p>
-    <p><strong>Fecha:</strong> {{ compra.fecha }}</p>
-    <p><strong>Estado:</strong> {{ compra.get_estado_display }}</p>
+    <div class="admin-section">
+        <h2 class="section-title">Compra</h2>
+        <div class="info-box">
+            <p><strong>ID de Compra:</strong> <span class="info-value">{{ compra.id }}</span></p>
+            <p><strong>Usuario:</strong> <span class="info-value">{{ compra.usuario }}</span></p>
+            <p><strong>Fecha:</strong> <span class="info-value">{{ compra.fecha }}</span></p>
+            <p><strong>Estado:</strong> <span class="info-value">{{ compra.get_estado_display }}</span></p>
+        </div>
+    </div>
 
-    <h2>Factura</h2>
-    <p><strong>ID de Factura:</strong> {{ factura.id }}</p>
-    <p><strong>ID de Compra:</strong> {{ factura.compra }}</p>
-    <p><strong>Fecha de Emisión:</strong> {{ factura.fecha_emision }}</p>
-    <p><strong>Total:</strong> ${{ factura.total }}</p>
-    <p><strong>Método de Pago:</strong> {{ factura.get_metodo_pago_display }}</p>
-    <p><strong>Forma de Pago:</strong> {{ factura.get_forma_pago_display }}</p>
-    <p><strong>Fecha de Pago:</strong> {{ factura.fecha_pago }}</p>
+    <div class="admin-section">
+        <h2 class="section-title">Factura</h2>
+        <div class="info-box">
+            <p><strong>ID de Factura:</strong> <span class="info-value">{{ factura.id }}</span></p>
+            <p><strong>ID de Compra:</strong> <span class="info-value">{{ factura.compra }}</span></p>
+            <p><strong>Fecha de Emisión:</strong> <span class="info-value">{{ factura.fecha_emision }}</span></p>
+            <p><strong>Total:</strong> <span class="info-value">${{ factura.total }}</span></p>
+            <p><strong>Método de Pago:</strong> <span class="info-value">{{ factura.get_metodo_pago_display }}</span></p>
+            <p><strong>Forma de Pago:</strong> <span class="info-value">{{ factura.get_forma_pago_display }}</span></p>
+            <p><strong>Fecha de Pago:</strong> <span class="info-value">{{ factura.fecha_pago }}</span></p>
+        </div>
+    </div> -->
 
-    <a class="btn btn-primary" href="{% url 'inicio' %}">Volver al Inicio</a>
-    <br><br>
+    <h2>Detalle de la Compra</h2>
+<p>Compra ID: {{ compra.id }}</p>
+<p>Total: {{ compra.total }}</p>
+<p>Estado: 
+    {% if compra.estado == 1 %} Creada {% elif compra.estado == 2 %} Pagada {% elif compra.estado == 3 %} Enviada {% else %} Cancelada {% endif %}
+</p>
+
+{% if not factura %}
+    <form method="POST" action="{% url 'procesar_pago' compra.id %}">
+        {% csrf_token %}
+        <label for="metodo_pago">Método de Pago:</label>
+        <select name="metodo_pago">
+            <option value="EFECTIVO">Efectivo</option>
+            <option value="TARJETA_CREDITO">Tarjeta de Crédito</option>
+        </select>
+
+        <label for="forma_pago">Forma de Pago:</label>
+        <select name="forma_pago">
+            <option value="CONTADO">Contado</option>
+            <option value="CREDITO">Crédito</option>
+        </select>
+
+        <button type="submit">Pagar y Generar Factura</button>
+    </form>
+{% else %}
+    <h3>Factura</h3>
+    <p>Factura ID: {{ factura.id }}</p>
+    <p>Total: {{ factura.total }}</p>
+    <p>Método de Pago: {{ factura.get_metodo_pago_display }}</p>
+    <p>Forma de Pago: {{ factura.get_forma_pago_display }}</p>
+    <p>Fecha de Pago: {{ factura.fecha_pago }}</p>
+{% endif %}
+
+    <div class="text-center">
+        <a class="btn btn-primary btn-primary-llamativo" href="{% url 'inicio' %}">Volver al Inicio</a>
+    </div>
 </section>
 {% endblock %}

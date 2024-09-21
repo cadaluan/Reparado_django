@@ -11,7 +11,6 @@ router.register(r'usuario', views.UsuarioViewSet)
 router.register(r'categoria', views.CategoriaViewSet)
 router.register(r'servicio', views.ServicioViewSet)
 router.register(r'solicitud', views.SolicitudViewSet)
-router.register(r'comentario', views.ComentarioViewSet)
 router.register(r'factura', views.FacturaViewSet)
 
 # Lista de rutas de URL del proyecto
@@ -79,6 +78,7 @@ urlpatterns = [
     path("vaciar_carrito/", views.vaciar_carrito, name="vaciar_carrito"),  # Vaciar el carrito
     path("guardar_compra/", views.guardar_compra, name="guardar_compra"),  # Confirmar compra
     path("detalle_compra/<int:compra_id>/", views.detalle_compra, name="detalle_compra"),  # Ver detalles de una compra específica
+    path('procesar_pago/<int:compra_id>/', views.procesar_pago, name='procesar_pago'),
     path("detalle_compras/", views.detalle_compras, name="detalle_compras"),  # Listar detalles de todas las compras
 
     # Ruta para el envío de correos

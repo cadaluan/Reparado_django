@@ -1,224 +1,231 @@
-/* Estilos generales */
+:root {
+    /* Colores principales (modo claro) */
+    --primary-color: #0056b3;
+    /* Azul oscuro profesional */
+    --secondary-color: #4a5568;
+    /* Gris oscuro */
+    --accent-color: #00b4d8;
+    /* Azul claro para detalles */
+    --background-color: #f4f4f9;
+    /* Gris muy claro */
+    --text-color: #2d3748;
+    /* Gris oscuro para texto */
+    --link-color: #0056b3;
+    --hover-color: #0077cc;
+    --border-color: #e2e8f0;
+    /* Gris para bordes sutiles */
+    --shadow-color: rgba(0, 0, 0, 0.1);
+
+    /* Modo oscuro */
+    --dark-background-color: #1a202c;
+    /* Gris casi negro */
+    --dark-text-color: #e2e8f0;
+    /* Texto claro */
+    --dark-secondary-color: #2d3748;
+    /* Gris intermedio */
+    --dark-link-color: #63b3ed;
+    /* Azul claro para enlaces */
+    --dark-hover-color: #90cdf4;
+    /* Azul más suave para hover */
+    --dark-border-color: #4a5568;
+    /* Gris oscuro para bordes */
+    --dark-shadow-color: rgba(255, 255, 255, 0.1);
+
+    --font-family: 'Helvetica Neue', Arial, sans-serif;
+}
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    list-style: none;
 }
 
 body {
-    width: 100%;
-    font-family: Arial, sans-serif;
+    font-family: var(--font-family);
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: var(--background-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Estilos del contenedor principal */
+/* Tipografía y encabezados */
+h1, h2, h3 {
+    font-family: var(--font-family);
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+}
+
+h2 {
+    font-size: 2em;
+    margin-bottom: 15px;
+}
+
+h3 {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+}
+
+p {
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    line-height: 1.8;
+    color: var(--text-color);
+}
+
+/* Contenedor principal */
 .container {
     max-width: 1200px;
     margin: 0 auto;
+    padding: 40px 20px;
 }
 
 /* Barra de navegación superior */
 #barrita {
     display: flex;
     justify-content: space-between;
-    background-color: #b9a799;
-    flex-wrap: nowrap;
+    align-items: center;
+    background-color: var(--primary-color);
+    padding: 15px 20px;
+    box-shadow: 0 2px 10px var(--shadow-color);
+    color: white;
 }
 
+#barrita a {
+    color: white;
+    text-decoration: none;
+    padding: 0 15px;
+    transition: color 0.3s ease;
+}
+
+#barrita a:hover {
+    color: var(--hover-color);
+}
+
+/* Banner */
 #banner {
     width: 100%;
-    height: 20vh;
+    height: 25vh;
+    background-color: var(--background-color);
+    background-image: url('tu-imagen-de-banner.jpg');
+    background-size: cover;
+    background-position: center;
 }
 
+/* Jumbotron */
 #jumbotron {
-    margin: 10px;
+    margin: 40px 0;
+    padding: 40px;
+    background-color: var(--secondary-color);
+    color: white;
+    text-align: center;
+    border-radius: 10px;
 }
 
-#tarjeta {
-    border: none;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: space-around;
+/* Estilos de tarjetas */
+.tarjeta {
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px var(--shadow-color);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background-color: white;
+}
+
+.tarjeta:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.tarjeta img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.tarjeta .content {
+    padding: 20px;
+}
+
+.tarjeta h3 {
     margin-bottom: 10px;
+    color: var(--primary-color);
+}
+
+.tarjeta p {
+    color: var(--text-color);
 }
 
 /* Lista de usuarios */
-.user-list tbody td > img {
-    position: relative;
+.user-list tbody td img {
     max-width: 50px;
-    float: left;
     margin-right: 15px;
 }
 
 .user-list tbody td .user-link {
-    display: block;
-    font-size: 1.25em;
-    padding-top: 3px;
-    margin-left: 60px;
+    font-size: 1.1em;
+    margin-left: 10px;
+    font-weight: 600;
+    color: var(--primary-color);
 }
 
 .user-list tbody td .user-subhead {
-    font-size: 0.875em;
-    font-style: italic;
+    font-size: 0.85em;
+    color: #777;
 }
 
-/* Estilos del footer */
-.footer {
-    background-color: black;
-    padding: 80px 0;
-}
-
-.footer-row {
-    display: flex;
-    flex-wrap: wrap;
-}
-
-.footer-link {
-    width: 25%;
-    padding: 0 15px;
-}
-
-.footer-link h4 {
-    font-size: 20px;
-    color: white;
-    margin-bottom: 10px;
-    font-weight: 500;
-    border-bottom: 2px solid #00c3ff;
-}
-
-.footer-link ul li a {
-    font-size: 18px;
-    text-decoration: none;
-    color: #bbbbbb;
-    display: block;
-    margin-bottom: 15px;
-    transition: all .3s ease;
-}
-
-.footer-link ul li a:hover {
-    color: white;
-    padding-left: 6px;
-}
-
-.social-link a {
-    display: inline-block;
-    min-height: 40px;
-    width: 40px;
-    background-color: rgba(255, 255, 255, 0.2);
-    margin: 0 10px 10px 0;
-    text-align: center;
-    line-height: 40px;
-    border-radius: 50%;
-    color: white;
-    transition: all .5s ease;
-}
-
-/* Estilos de la barra de navegación y botones */
-.navbar, .btn-primary {
-    color: #000000;
-}
-
-.bg-dark {
-    background-color: #c8c8c8;
-}
-
-.text-white, .navbar-toggler-icon {
-    color: #ffffff;
-}
-
-.btn-primary {
-    background-color: #ff6600;
-    border-color: #ff6600;
-}
-
-.btn-primary:hover {
-    background-color: #badbf3;
-    border-color: #badbf3;
-}
-
-.btn-primary-llamativo {
-    background-color: #ff6600;
-    color: #fff;
-    border: none;
-    padding: 20px 40px;
-    font-size: 1.5rem;
-    border-radius: 10px;
-    transition: background-color 0.3s;
-}
-
-.btn-primary-llamativo:hover {
-    background-color: #badbf3;
-}
-
-.hero-con-imagen {
-    background-image: url("../img/portada1.jpg");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-}
-
-.btn-orange {
-    background-color: #ff6600;
-    color: #fff;
-    border-color: #ff6600;
-}
-
-.btn-orange:hover {
-    background-color: #badbf3;
-    border-color: #badbf3;
-}
-
-.fas {
-    color: #ff6600;
-}
-
-#calendar {
-    max-width: 1100px;
-    margin: 40px auto;
-}
-
-/* Estilos para el botón flotante */
-.whatsapp-btn {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background-color: green;
-    color: white;
-    padding: 15px;
-    border-radius: 50%;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
-    cursor: pointer;
-}
-
-.whatsapp-btn:hover {
-    background-color: darkgreen;
-}
-
-/* Estilos de la barra de navegación a la izquierda */
+/* Barra de navegación izquierda */
 .sidebar {
     width: 250px;
     height: 100%;
-    background-color: #333;
-    color: #fff;
+    background-color: var(--secondary-color);
+    color: white;
     position: fixed;
     top: 0;
     left: 0;
     overflow-y: auto;
-}
-
-.sidebar ul {
-    padding: 0;
-}
-
-.sidebar li {
-    padding: 10px;
+    padding-top: 20px;
+    transition: left 0.3s ease;
 }
 
 .sidebar a {
-    color: #fff;
+    color: white;
     text-decoration: none;
     display: block;
+    padding: 10px;
+    margin-bottom: 10px;
+    transition: background-color 0.3s;
+}
+
+.sidebar a:hover {
+    background-color: var(--hover-color);
+}
+
+/* Responsividad de la barra lateral */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        position: absolute;
+        left: -250px;
+    }
+
+    .sidebar.open {
+        left: 0;
+    }
+
+    .sidebar-toggle {
+        display: block;
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background-color: var(--secondary-color);
+        color: white;
+        padding: 10px;
+    }
 }
 
 /* Estilos del contenido principal */
@@ -227,15 +234,241 @@ body {
     padding: 20px;
 }
 
-/* Estilos de las secciones del administrador */
-.admin-section {
+@media (max-width: 768px) {
+    .content {
+        margin-left: 0;
+    }
+}
+
+/* Footer */
+.footer {
+    width: 100%;
+    background-color: var(--secondary-color);
+    padding: 60px 0;
+    color: white;
+}
+
+.footer-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.footer-link {
+    width: 22%;
     margin-bottom: 20px;
 }
 
-/* Estilos del encabezado del contenido */
-header {
+.footer-link h4 {
+    font-size: 1.3em;
+    margin-bottom: 15px;
+    border-bottom: 2px solid var(--accent-color);
+}
+
+.footer-link ul li a {
+    font-size: 1em;
+    color: var(--text-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-link ul li a:hover {
+    color: var(--accent-color);
+}
+
+/* Redes sociales */
+.social-link a {
+    font-size: 1.5em;
+    margin-right: 15px;
+    color: white;
+    transition: color 0.3s ease;
+}
+
+.social-link a:hover {
+    color: var(--accent-color);
+}
+
+/* Botones */
+.btn {
+    padding: 12px 25px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    font-size: 1rem;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: var(--hover-color);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.btn-danger {
+    background-color: #e53e3e;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #c53030;
+}
+
+/* Botón flotante de WhatsApp */
+.whatsapp-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #25D366;
+    color: white;
+    font-size: 2rem;
+    padding: 15px;
+    border-radius: 50%;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    transition: background-color 0.3s ease;
+}
+
+.whatsapp-btn:hover {
+    background-color: #1EBE59;
+}
+
+/* Modales */
+.modal-header {
+    background-color: #e53e3e;
+    color: white;
+}
+
+.modal-body {
+    background-color: #fff5f5;
+    color: #e53e3e;
+}
+
+/* Modo oscuro */
+body.dark-mode {
+    background-color: var(--dark-background-color);
+    color: var(--dark-text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body.dark-mode a {
+    color: var(--dark-link-color);
+}
+
+body.dark-mode h1, body.dark-mode h2, body.dark-mode h3 {
+    color: var(--dark-text-color);
+}
+
+body.dark-mode #jumbotron {
+    background-color: var(--dark-secondary-color);
+}
+
+body.dark-mode .tarjeta {
+    background-color: var(--dark-secondary-color);
+    color: var(--dark-text-color);
+}
+
+body.dark-mode .btn-primary {
+    background-color: var(--dark-link-color);
+}
+
+body.dark-mode .btn-primary:hover {
+    background-color: var(--dark-hover-color);
+}
+
+body.dark-mode .footer {
+    background-color: var(--dark-secondary-color);
+}
+
+
+.section {
+    padding: 60px 0;
+}
+.testimonial {
+    font-size: 1.2rem;
+    color: #7f8c8d;
     text-align: center;
-    background-color: #333;
+    margin-bottom: 20px;
+}
+.carousel-item {
+    padding: 20px;
+}
+
+.purchase-list, .invoice-list {
+    list-style: none;
+    padding: 0;
+}
+
+.purchase-item, .invoice-item {
+    background-color: var(--color-info-box);
+    padding: 1rem;
+    border-radius: 5px;
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1.5rem;
+}
+
+.info-box p {
+    margin: 0.5rem 0;
+}
+
+.info-value {
+    color: var(--color-primary);
+    font-weight: bold;
+}
+
+hr {
+    border: 1px solid var(--color-secondary);
+    margin: 1rem 0;
+}
+
+.btn-primary-llamativo {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
     color: #fff;
-    padding: 10px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    border-radius: 5px;
+}
+
+.btn-primary-llamativo:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+.compras-section, .facturas-section {
+    margin-bottom: 2rem;
+}
+
+.purchase-item, .invoice-item {
+    background-color: var(--color-info-box);
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.purchase-header, .invoice-header {
+    margin-bottom: 1rem;
+    color: var(--color-primary);
+    font-weight: bold;
+}
+
+.factura-title {
+    margin-top: 1rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.invoice-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.invoice-item {
+    background-color: var(--color-background);
+    padding: 1rem;
+    border-radius: 5px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }

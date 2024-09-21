@@ -72,7 +72,6 @@ admin.site.register(Usuario, UsuarioAdmin)
 admin.site.register(Categoria, CategoriaAdmin)
 admin.site.register(Servicio, ServicioAdmin)
 admin.site.register(Solicitud, SolicitudAdmin)
-admin.site.register(Comentario)
 admin.site.register(Factura)
 admin.site.register(Compra)
 

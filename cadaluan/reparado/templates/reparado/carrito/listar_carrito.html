@@ -10,34 +10,43 @@
     {% endfor %}
 {% endif %}
 
-    <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="offcanvasRightLabel">Servicios ({{ request.session.items_carrito|default:0 }})</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+<div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="offcanvasRightLabel">Servicios ({{ request.session.items_carrito|default:0 }})</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+</div>
+<div class="offcanvas-body">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Servicio</th>
+                <th>Tiempo</th>
+                <th>Subtotal</th>
+                <th>Eliminar</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in data %}
+            <tr>
+                <td>
+                    <strong>{{ p.servicio.nombre_ser }}</strong><br>
+                    Precio: <span class="text-success">${{ p.precio|intcomma }}</span>
+                </td>
+                <td>{{ p.tiempo_estimado }}</td>
+                <td><strong>${{ p.subtotal|intcomma }}</strong></td>
+                <td>
+                    <a href="javascript:del_item_carrito(`{% url 'eliminar_item_carrito' p.id %}`);" class="btn btn-danger btn-sm">X</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div class="total-section mt-3">
+        <p>Total: <strong>${{ total|intcomma }}</strong></p>
     </div>
-    <div class="offcanvas-body">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Servicio</th>
-                    <th>Tiempo</th>
-                    <th>Subtotal</th>
-                    <th>Eliminar</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for p in data  %}
-                <tr>
-                    <td>
-                        {{ p.servicio.nombre_ser }}<br>Precio: <strong>${{ p.precio|intcomma }}</strong>
-                    </td>
-                    <td>{{ p.tiempo_estimado }}</td>
-                    <td>${{ p.subtotal|intcomma }}</td>
-                    <td><a href="javascript:del_item_carrito(`{% url 'eliminar_item_carrito' p.id %}`);" class="btn btn-danger">X</a></td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        Total: <strong>${{ total|intcomma }}</strong><br/><br/>
+
+    <div class="d-flex justify-content-between mt-4">
         <a href="{% url 'vaciar_carrito' %}" class="btn btn-secondary">Vaciar carrito</a>
         <a href="{% url 'guardar_compra' %}" class="btn btn-primary">Comprar</a>
     </div>
+</div>

@@ -1,0 +1,115 @@
+{% extends 'reparado/layouts/nueva_base.html' %}
+{% load static %}
+{% load humanize %}
+{% load filters %}
+{% block titulo %}Servicios{% endblock %}
+{% block principal %}
+
+<div class="container mt-3">
+    <div class="row">
+        <!-- Aside para categorías -->
+        <aside class="col-md-3">
+            <h4 class="mb-3">Categorías</h4>
+            <ul class="list-group mb-3">
+                {% for categoria in categorias %}
+                <li class="list-group-item {% if request.GET.categoria == categoria.id|stringformat:"s" %}active{% endif %}">
+                    <a href="?categoria={{ categoria.id }}" class="text-decoration-none {% if request.GET.categoria == categoria.id|stringformat:"s" %}text-white{% else %}text-dark{% endif %}">
+                        {{ categoria.nombre_cat }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+            <!-- Botón para limpiar el filtro -->
+            <a href="{% url 'servicios' %}" class="btn btn-secondary w-100">
+                Limpiar filtro
+            </a>
+        </aside>
+
+        <!-- Sección principal de servicios -->
+        <section class="col-md-9">
+            <!-- Indicador del filtro activo -->
+            {% if request.GET.categoria %}
+            <div class="alert alert-info">
+                Mostrando servicios para la categoría: <strong>{{ categorias|get_categoria_by_id:request.GET.categoria }}</strong>
+            </div>
+            {% endif %}
+
+            <!-- Filtro de ordenación -->
+            <div class="d-flex justify-content-end mb-3">
+                <form method="GET" class="form-inline">
+                    <select name="orden" onchange="this.form.submit()" class="form-select w-auto">
+                        <option value="">Ordenar por...</option>
+                        <option value="precio" {% if request.GET.orden == "precio" %}selected{% endif %}>Precio</option>
+                        <option value="tiempo_estimado" {% if request.GET.orden == "tiempo_estimado" %}selected{% endif %}>Tiempo Estimado</option>
+                    </select>
+                    <input type="hidden" name="categoria" value="{{ request.GET.categoria }}">
+                </form>
+            </div>
+
+            <div class="row">
+                <!-- Si hay servicios disponibles, mostrar las tarjetas -->
+                {% if page_obj %}
+                {% for servicio in page_obj %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm tarjeta">
+                        <!-- Imagen del servicio -->
+                        <img src="{{ servicio.foto.url }}" class="card-img-top" alt="Imagen de {{ servicio.nombre_ser }}" style="height: 200px; object-fit: cover;">
+
+                        <div class="card-body">
+                            <!-- Mostrar la categoría del servicio -->
+                            <span class="badge bg-secondary mb-2 text-truncate" style="max-width: 100%;">
+                                {{ servicio.categoria.nombre_cat }}
+                            </span>
+                            <h5 class="card-title">{{ servicio.nombre_ser }}</h5>
+                            <p class="card-text">{{ servicio.desc_ser|truncatewords:20 }}</p>
+                            <p><strong>Precio (Hora):</strong> ${{ servicio.precio | intcomma }}</p>
+                            <p><strong>Tiempo estimado:</strong> {{ servicio.tiempo_estimado }} minutos</p>
+                        </div>
+
+                        <div class="card-footer text-center">
+                            <button type="button" class="btn btn-info" 
+                                    onclick="modal(`{% url 'solicitud_servicio' servicio.id %}`)">
+                                <i class="bi bi-calendar2-day"></i> Solicitar Servicio
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p>No se encontraron servicios en esta categoría.</p>
+                {% endif %}
+            </div>
+
+            <!-- Paginación -->
+            <div class="d-flex justify-content-center">
+                <nav>
+                    <ul class="pagination">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                            <a class="page-link" href="?page={{ num }}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}">{{ num }}</a>
+                        </li>
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </section>
+    </div>
+</div>
+
+{% endblock %}

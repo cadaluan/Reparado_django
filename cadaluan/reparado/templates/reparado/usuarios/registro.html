@@ -8,14 +8,12 @@
         </div>
 
         <div class="modal-body">
-            <!-- Contenido del formulario de registro con información adicional-->
-
             <form method="post" enctype="multipart/form-data" action="{% url 'registro' %}">
                 {% csrf_token %}
 
                 <div class="mb-3">
-                    <label for="username" class="form-label">Username:</label>
-                    <input type="text" class="form-control" id="username" name="username" required aria-label="Apellido"/>
+                    <label for="email" class="form-label">Correo:</label>
+                    <input type="text" class="form-control" id="email" name="email" required aria-label="Correo usuario"/>
                 </div>
 
                 <div class="mb-3">
@@ -38,7 +36,6 @@
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary">Registrarse</button>
                 </div>
-
             </form>
 
         </div>

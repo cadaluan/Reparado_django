@@ -1,7 +1,7 @@
 <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
         <div class="modal-header">
-            <h5 class="modal-title" id="iniciarSesionModalLabel">Iniciar Sesión</h5>
+            <h5 class="modal-title" id="iniciarSesionModalLabel">Iniciar Sesiónaaaaaaaaaaa</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body">
@@ -9,8 +9,8 @@
             <form action="{% url 'login' %}" method="post">
                 {% csrf_token %}
                 <div class="mb-3">
-                    <label for="username" class="form-label">Usuario</label>
-                    <input type="text" class="form-control" id="username" name="username" required aria-label="Usuario" />
+                    <label for="email" class="form-label">Correo</label>
+                    <input type="text" class="form-control" id="email" name="email" required aria-label="Correo usuario" />
                 </div>
                 <div class="mb-3">
                     <label for="password" class="form-label">Contraseña</label>

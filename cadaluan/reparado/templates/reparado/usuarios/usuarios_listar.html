@@ -1,62 +1,77 @@
 {% extends 'reparado/layouts/nueva_base.html' %}
-
 {% load static %}
 
 {% block titulo %}Usuarios{% endblock %}
 
 {% block principal %}
+<section class="container mt-4">
+    <!-- Título principal con espaciado adecuado -->
+    <h3 class="mb-4 text-center">Información de Usuarios</h3>
 
-<section class="container mt-3">
-    <h3>Información Usuarios</h3>
-    <table id="dataTable" class="table user-list table-bordered table-hover">
-        <thead>
-        <tr>
-            <th><span>Id Usuario</span></th>
-            <th><span>User</span></th>
-            <th><span>Fecha Nacimiento</span></th>
-            <th><span>Email</span></th>
-            <th>Opciones</th>
-        </tr>
-        </thead>
+    <!-- Tabla estilizada -->
+    <div class="table-responsive">
+        <table id="dataTable" class="table user-list table-hover table-bordered table-striped">
+            <thead class="bg-dark text-white text-center">
+                <tr>
+                    <th>Id Usuario</th>
+                    <th>User</th>
+                    <th>Fecha Nacimiento</th>
+                    <th>Email</th>
+                    <th>Opciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in data %}
+                <tr class="align-middle text-center">
+                    <!-- Columna ID -->
+                    <td>{{ u.id }}</td>
+                    
+                    <!-- Columna de usuario con imagen y detalles -->
+                    <td class="d-flex align-items-center justify-content-start">
+                        <img src="{{ u.foto.url }}" alt="{{ u.nombre }}" class="rounded-circle me-2" style="max-width: 50px; height: 50px;">
+                        <div class="d-inline-block text-start">
+                            <a class="user-link fw-bold">{{ u.nombre }} {{ u.apellido }}</a>
+                            <br>
+                            <span class="user-subhead text-muted">{{ u.get_rol_display }}</span>
+                        </div>
+                    </td>
 
-        <tbody>
-        {% for u in data %}
-        <tr>
-            <td>
-                {{ u.id }}
-            </td>
-            <td>
-                <img src="{{ u.foto.url }}" alt=""/>
-                <a class="user-link">{{ u.nombre }} {{ u.apellido }}</a>
-                <span class="user-subhead">{{ u.get_rol_display }}</span>
-            </td>
-            <td>{{ u.fecha_nacimiento|date:"d/m/Y" }}</td>
-            <td><a href="" >{{ u.email }}</a></td>
-            <td>
-                {% if request.session.logueo.rol == "ADMIN" %}
-                <button type="button" class="btn btn-dark" 
-                    onclick="modal(`{% url 'usuarios_visualizar' u.id %}`)">
-                    <i class="bi bi-eye"></i>
-                </button>
-                <button class="btn btn-ligth"
-                        onclick="modal(`{% url 'usuarios_editar' u.id %}`)">
-                    <i class="bi bi-pencil-square"></i>
-                </button>
-                <button class="btn btn-danger"
-                        onclick="modal(`{% url 'usuarios_eliminar' u.id %}`)">
-                    <i class="bi bi-trash3"></i>
-                </button>
-                {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+                    <!-- Fecha de nacimiento -->
+                    <td>{{ u.fecha_nacimiento|date:"d/m/Y" }}</td>
+                    
+                    <!-- Email -->
+                    <td><a href="mailto:{{ u.email }}" class="text-decoration-none text-dark">{{ u.email }}</a></td>
+
+                    <!-- Opciones con botones para ver, editar y eliminar -->
+                    <td class="text-center">
+                        {% if request.session.logueo.rol == "ADMIN" %}
+                        <button type="button" class="btn btn-outline-info btn-sm" 
+                                onclick="modal(`{% url 'usuarios_visualizar' u.id %}`)" title="Ver Usuario">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm"
+                                onclick="modal(`{% url 'usuarios_editar' u.id %}`)" title="Editar Usuario">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm"
+                                onclick="modal(`{% url 'usuarios_eliminar' u.id %}`)" title="Eliminar Usuario">
+                            <i class="bi bi-trash3"></i>
+                        </button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Botón para crear nuevo usuario -->
     {% if request.session.logueo.rol == "ADMIN" %}
-    <br>
-    <a class="btn btn-primary" href="{% url 'usuarios_crear' %}">Crear nuevo Usuario</a>
-    <br><br>
+    <div class="d-flex justify-content-center mt-4">
+        <a class="btn btn-primary" href="{% url 'usuarios_crear' %}">
+            <i class="bi bi-person-plus-fill"></i> Crear Usuario
+        </a>
+    </div>
     {% endif %}
 </section>
-
 {% endblock %}

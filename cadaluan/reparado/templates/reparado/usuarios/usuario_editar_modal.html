@@ -7,10 +7,18 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-            <form action="{% url 'usuarios_editar' usuario.id %}" method="post">
+            <form action="{% url 'usuarios_editar' usuario.id %}" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 <!--<input type="hidden" id="servicio_id" name="servicio_id" value="{{ servicio.id }}" />-->
-
+                <div class="mb-3 text-center">
+                    <img src="{{ usuario.foto.url }}" alt="Foto de usuario" class="img-thumbnail mb-2" style="width: 150px; height: 150px;">
+                    <label for="foto" class="form-label">Cambiar Foto de Perfil:</label>
+                    <input type="file" class="form-control" id="foto" name="foto" accept="image/*">
+                </div>
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" class="form-control" id="username" name="username" value="{{ usuario.username }}" />
+                </div>
                 <div class="mb-3">
                     <label for="nombre" class="form-label">Nombre del Usuario:</label>
                     <input type="text" class="form-control" id="nombre" name="nombre" value="{{ usuario.nombre }}" />
@@ -48,12 +56,18 @@
                 </div>
                 {% if request.session.logueo.rol == "ADMIN" %}
                 <div class="mb-3">
-                    <label for="categorias" class="form-label">Categorías:</label>
-                    <select name="categorias" id="categorias" class="form-control" multiple>
+                    <label class="form-label">Categorías:</label>
+                    <div class="form-check">
                         {% for categoria in categorias %}
-                            <option value="{{ categoria.id }}" {% if categoria in usuario.categorias.all %} selected {% endif %}>{{ categoria.nombre_cat }}</option>
+                            <div class="mb-1">
+                                <input class="form-check-input" type="checkbox" id="categoria{{ categoria.id }}" name="categorias" value="{{ categoria.id }}"
+                                {% if categoria in usuario.categorias.all %} checked {% endif %}>
+                                <label class="form-check-label" for="categoria{{ categoria.id }}">
+                                    {{ categoria.nombre_cat }}
+                                </label>
+                            </div>
                         {% endfor %}
-                    </select>
+                    </div>
                 </div>
                 {% endif %}
                 <div class="modal-footer">

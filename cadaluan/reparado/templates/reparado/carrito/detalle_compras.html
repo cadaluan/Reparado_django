@@ -2,34 +2,38 @@
 
 {% block principal %}
 <section class="container mt-3">
-<h1>Detalle de Compras y Facturas</h1>
+    <h1 class="text-center">Detalle de Compras y Facturas</h1>
 
     {% if compras %}
-        <h2>Compras</h2>
-        <ul>
+        <h2 class="section-title">Compras</h2>
+        <ul class="purchase-list">
             {% for compra in compras %}
-                <li>
-                    <strong>ID de Compra:</strong> {{ compra.id }}<br>
-                    <strong>Fecha:</strong> {{ compra.fecha }}<br>
-                    <strong>Estado:</strong> {{ compra.get_estado_display }}<br>
+                <li class="purchase-item">
+                    <div class="info-box">
+                        <p><strong>ID de Compra:</strong> <span class="info-value">{{ compra.id }}</span></p>
+                        <p><strong>Fecha:</strong> <span class="info-value">{{ compra.fecha }}</span></p>
+                        <p><strong>Estado:</strong> <span class="info-value">{{ compra.get_estado_display }}</span></p>
+                    </div>
 
                     {% if facturas %}
-                        <h3>Facturas asociadas:</h3>
-                        <ul>
+                        <h3 class="factura-title">Facturas asociadas:</h3>
+                        <ul class="invoice-list">
                             {% for factura in facturas %}
                                 {% if factura.compra_id == compra.id %}
-                                    <li>
-                                        <strong>ID de Factura:</strong> {{ factura.id }}<br>
-                                        <strong>Fecha de Emisión:</strong> {{ factura.fecha_emision }}<br>
-                                        <strong>Total:</strong> ${{ factura.total }}<br>
-                                        <strong>Método de Pago:</strong> {{ factura.get_metodo_pago_display }}<br>
-                                        <strong>Forma de Pago:</strong> {{ factura.get_forma_pago_display }}<br>
-                                        <strong>Fecha de Pago:</strong> {{ factura.fecha_pago }}<br>
+                                    <li class="invoice-item">
+                                        <div class="info-box">
+                                            <p><strong>ID de Factura:</strong> <span class="info-value">{{ factura.id }}</span></p>
+                                            <p><strong>Fecha de Emisión:</strong> <span class="info-value">{{ factura.fecha_emision }}</span></p>
+                                            <p><strong>Total:</strong> <span class="info-value">${{ factura.total }}</span></p>
+                                            <p><strong>Método de Pago:</strong> <span class="info-value">{{ factura.get_metodo_pago_display }}</span></p>
+                                            <p><strong>Forma de Pago:</strong> <span class="info-value">{{ factura.get_forma_pago_display }}</span></p>
+                                            <p><strong>Fecha de Pago:</strong> <span class="info-value">{{ factura.fecha_pago }}</span></p>
+                                        </div>
                                     </li>
                                 {% endif %}
                             {% endfor %}
                         </ul>
-                    {% else %}
+                    {% else %}  
                         <p>No hay facturas asociadas a esta compra.</p>
                     {% endif %}
                 </li>
@@ -40,7 +44,9 @@
         <p>No tienes compras realizadas.</p>
     {% endif %}
 
-    <a class="btn btn-primary" href="{% url 'inicio' %}">Volver al Inicio</a>
-    <br><br>
+    <div class="text-center">
+        <a class="btn btn-primary btn-primary-llamativo" href="{% url 'inicio' %}">Volver al Inicio</a>
+    </div>
 </section>
 {% endblock %}
+    
