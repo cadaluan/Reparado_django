@@ -6,6 +6,8 @@
 
 {% block principal %}
 
+{% include 'reparado/layouts/navbar.html' %}
+
 <div class="container col-md-6 mt-4">
 	<h1>Crear Nuevo Servicio</h1>
 	<form action="{% url 'servicios_crear'%}" method="post">

@@ -24,6 +24,15 @@ from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 
 
+
+
+def tecnico(request):
+    logueo = request.session.get("logueo", False)
+    if logueo:
+        return render(request, "reparado/layouts/tecnico.html") # direcciona a la vista llamada inicio
+    else:
+        return render(request, "reparado/layouts/nuevo_login.html")
+
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
@@ -79,7 +88,14 @@ def login(request):
                 request.session["carrito"] = []
                 request.session["items_carrito"] = 0
                 request.session["total_carrito"] = 0
-                return redirect("inicio")
+                
+                # Redirigir según el rol del usuario
+            if q.rol == 'ADMIN':
+                return redirect("inicio")  # Cambia esto por la URL de tu vista para admin
+            elif q.rol == 'USU':
+                return redirect("inicio")  # Cambia esto por la URL de tu vista para usuario
+            elif q.rol == 'TEC':
+                return redirect("tecnico")  # Cambia esto por la URL de tu vista para técnico
             else:
                 raise Exception(verify)
         except Exception as e:
@@ -1114,6 +1130,28 @@ def enviar_correo(ruta, email, token):
     except Exception as e:
         return f"Error: {e}"
 
+# vistas footer
+
+def contactanos(request):
+    return render(request, "reparado/footer/compania/contactanos.html" )
+
+
+def nosotros(request):
+    return render(request, "reparado/footer/compania/nosotros.html" )
+
+def nuestros_servicios(request):
+    q = Servicio.objects.all()
+    context = {"data": q}
+    return render(request, "reparado/footer/compania/nuestros_servicios.html", context )
+
+def politica_privacidad(request):
+    return render(request, "reparado/footer/compania/Politica_privacidad.html" )
+
+def siguenos(request):
+    return render(request, "reparado/footer/compania/siguenos.html" )
+
+def pregunta(request):
+    return render(request, "reparado/footer/compania/pregunta.html" )    
 
 # ------------------------------- Para los permisos de los end-points -----------------------------
 
@@ -1143,7 +1181,7 @@ class ServicioViewSet(viewsets.ModelViewSet):
 class SolicitudViewSet(viewsets.ModelViewSet):
     # permission_classes = [IsAuthenticated]
     queryset = Solicitud.objects.all()
-    print(queryset)
+    #print(queryset)
     serializer_class = SolicitudSerializer
 
 

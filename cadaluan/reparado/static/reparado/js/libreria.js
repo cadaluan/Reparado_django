@@ -50,14 +50,14 @@ function offcanvas(ruta) {
 function add_carrito(ruta, id) {
 	r = $("#offcanvasRight")
 
-	id_solicitud = $("#id_solicitud_" + id).val();
+	id_servicio = $("#id_servicio_" + id).val();
 
 	//dataType: 'json'
 	$.ajax({
 			method: "GET",
 			url: ruta,
 			data: {
-				"id_solicitud": id_solicitud
+				"id_servicio": id_servicio
 			}
 		})
 		.done(function(respuesta) {
@@ -96,7 +96,6 @@ function quitar_alertas() {
 	}, 1000);
 }
 
-// Calendario
 document.addEventListener("DOMContentLoaded", function() {
     var calendarEl = document.getElementById("calendar");
     var calendar;
@@ -138,3 +137,89 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 });
+
+const panels = document.querySelectorAll('.panel')
+
+panels.forEach(panel => {
+    panel.addEventListener('click', () => {
+        removeActiveClasses()
+        panel.classList.add('active')
+    })
+})
+
+const removeActiveClasses = () => {
+    panels.forEach(panel => {
+        panel.classList.remove('active')
+    })
+}
+
+/* split- landing page */
+
+const left = document.querySelector('.left')
+const right = document.querySelector('.right')
+const container = document.querySelector('.container2')
+
+left.addEventListener('mouseenter', () => container.classList.add('hover-left'))
+left.addEventListener('mouseleave', () => container.classList.remove('hover-left'))
+
+right.addEventListener('mouseenter', () => container.classList.add('hover-right'))
+right.addEventListener('mouseleave', () => container.classList.remove('hover-right'))
+
+/* contenido usuarios interactivo */
+
+const jokeEl = document.getElementById('joke');
+const jokeBtn = document.getElementById('jokeBtn');
+
+jokeBtn.addEventListener('click', generateJoke);
+
+generateJoke();
+
+/* siguenos*/
+
+const counters = document.querySelectorAll('.counter')
+
+counters.forEach(counter => {
+    counter.innerText = '0'
+
+    const updateCounter = () => {
+        const target = +counter.getAttribute('data-target')
+        const c = +counter.innerText
+
+        const increment = target / 200
+
+        if (c < target) {
+            counter.innerText = `${ Math.ceil(c + increment) }`
+            setTimeout(updateCounter, 1)
+        } else {
+            counter.innerText = target
+        }
+    }
+
+    updateCounter()
+})
+
+/* estilos js preguntas */
+
+const toggles = document.querySelectorAll('.faq-toggle')
+
+toggles.forEach(toggle => {
+    toggle.addEventListener('click', () => {
+        toggle.parentNode.classList.toggle('active')
+    })
+})
+
+/*====================================
+			Single Portfolio Slider JS
+		======================================*/ 
+		$('.pf-details-slider').owlCarousel({
+			items:1,
+			autoplay:false,
+			autoplayTimeout:5000,
+			smartSpeed: 400,
+			autoplayHoverPause:true,
+			loop:true,
+			merge:true,
+			nav:true,
+			dots:false,
+			navText: ['<i class="icofont-rounded-left"></i>', '<i class="icofont-rounded-right"></i>'],
+		});

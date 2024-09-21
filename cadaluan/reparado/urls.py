@@ -83,4 +83,15 @@ urlpatterns = [
 
     # Correo
     path("enviar_correo/", views.enviar_correo, name="enviar_correo"),
+
+     # footer
+    path("contactanos/", views.contactanos, name="contactanos"),
+    path("nosotros/", views.nosotros, name="nosotros"),
+    path("nuestros_servicios/", views.nuestros_servicios, name="nuestros_servicios"),
+    path("politica_privacidad/", views.politica_privacidad, name="politica_privacidad"),
+    path("siguenos/", views.siguenos, name="siguenos"),
+     path("pregunta/", views.pregunta, name="pregunta"),
+
+    # tecnico
+    path("tecnico/", views.tecnico, name="tecnico"),
 ]

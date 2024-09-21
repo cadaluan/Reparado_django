@@ -3,161 +3,196 @@
 <!DOCTYPE html>
 
 <html lang="es">
-    <head>
-        <meta charset="UTF-8" />
-        <meta
-            name="viewport"
-            content="width=device-width,
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,
 					  user-scalable=no,
 					  initial-scale=1.0,
 					  maximum-scale=1.0,
-					  minimum-scale=1.0"
-        />
-        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-        <link rel="stylesheet" href="{% static 'reparado/css/bootstrap.min.css' %}" />
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
-        <link rel="stylesheet" href="{% static 'reparado/css/estilos.css' %}" />
-        <link href="{% static 'reparado/css/datatables.min.css' %}" rel="stylesheet" />
-        <title>ReparaDo! - {% block titulo %}{% endblock %}</title>
-    </head>
+					  minimum-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link rel="stylesheet" href="{% static 'reparado/css/bootstrap.min.css' %}" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="{% static 'reparado/css/estilos.css' %}" />
+    <link href="{% static 'reparado/css/datatables.min.css' %}" rel="stylesheet" />
+    <link href="{% static 'reparado/css/font-awesome.min.css' %}" rel="stylesheet" />
+   
+   
+    <title>ReparaDo! - {% block titulo %}{% endblock %}</title>
+</head>
 
-    <body>
-        <header>
-            <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-                <div class="container-fluid">
-                    <a class="navbar-brand" href="{% url 'index' %}">ReparaDo!</a>
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mynavbar">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <div class="collapse navbar-collapse" id="mynavbar">
-                        <ul class="navbar-nav me-auto">
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Clientes</a>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a class="dropdown-item" href="{% url 'usuarios' %}">Visualizar Usuarios</a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="#">Registro de Nuevos Clientes</a>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Categorías</a>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a class="dropdown-item" href="{% url 'categorias_crear' %}">Creación de Categorías</a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="{% url 'categorias' %}">Visualización de Categorías</a>
-                                    </li>
-                                </ul>
-                            </li>
-                        </ul>
-                        <ul class="d-flex navbar-nav">
-                            <li class="nav-item">
-                                <div>
-                                    <a onclick="offcanvas(`{% url 'visualizar_perfil' request.session.logueo.id %}`)" class="nav-link position-relative" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">
-                                        <i class="bi bi-person"></i>
-                                        <span class="position-relative">{{ request.session.logueo.username }}</span>
-                                    </a>
-                                </div>
-                            </li>
-                            <li class="nav-item">
-                                <div>
-                                    <a onclick="offcanvas(`{% url 'ver_carrito' %}`)" class="nav-link position-relative" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">
-                                        <i class="bi bi-cart4"></i>
-                                        <span class="position-relative top-0 start-75 translate-middle badge rounded-pill bg-danger" style="margin-left: 0.5rem;">{{ request.session.items_carrito|default:0 }}</span>
-                                    </a>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
+<body>
+
+
+
+    <!--   <section class="expande">
+            <div class="container1" id="container1">
+              <div class="split left">
+                <h1 id="titulo1">La solución a un click</h1>
+                <a href="#" class="btn1">Solicita tu servicio ahora!</a>
+              </div>
+              <div class="split right">
+                <h1>Contactanos ahora</h1>
+          
+                <a href="https://wa.me/573023383914" class="btn1">Contacte con un asesor!</a>
+              </div>
+            </div>
+          </section>
+        -->
+    {% if messages %} {% for message in messages %}
+    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show"
+        role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %} {% endif %}
+
+    <main>
+        {% block principal %} {% endblock %}
+    </main>
+    <div class="modal fade" id="modal" tabindex="-1" aria-labelledby="modal" aria-hidden="true">
+
+    </div>
+
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel"></div>
+
+    <footer class="fixed">
+        <div class="footer container-fluid bg-dark text-white">
+            <div class="footer-row">
+                <div class="col-md-6 col-lg-3">
+                    <img src="{% static 'reparado/img/logo ReparaDo.jpg' %}" alt="Logo ReparaDo"
+                        class="img-fluid rounded-circle" style="max-height: 150px;" />
                 </div>
-            </nav>
-        </header>
 
-        {% if messages %} {% for message in messages %}
-        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        {% endfor %} {% endif %}
+                <div class="footer-link">
+                    <h4>Compañía</h4>
+                    <ul>
+                        <li><a href="{% url 'nosotros' %}">Nosotros</a></li>
+                        <li><a href="{% url 'nuestros_servicios' %}">Nuestros servicios</a></li>
+                        <li><a href="{% url 'siguenos' %}">Síguenos</a></li>
+                        <li><a href="{% url 'contactanos' %}">contáctanos</a></li>
+                        <li><a href="{% url 'politica_privacidad' %}">Política de privacidad</a></li>
+                    </ul>
+                </div>
+                <div class="footer-link">
+                    <h4>Ayudas</h4>
+                    <ul>
+                        <li><a href="#">Preguntas</a></li>
+                        <li><a href="#">Solicitudes</a></li>
+                        <li><a href="#">Citas</a></li>
+                        <li><a href="#">Pagos</a></li>
+                    </ul>
+                </div>
 
-        <main>
-            {% block principal %} {% endblock %}
-        </main>
-        <div class="modal fade" id="modal" tabindex="-1" aria-labelledby="modal" aria-hidden="true">
-
-        </div>
-
-        <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel"></div>
-
-        <footer class="fixed">
-            <div class="footer container-fluid bg-dark text-white">
-                <div class="footer-row">
-                    <div class="col-md-6 col-lg-3">
-                        <img src="{% static 'reparado/img/logo ReparaDo.jpg' %}" alt="Logo ReparaDo" class="img-fluid rounded-circle" style="max-height: 150px;" />
-                    </div>
-
-                    <div class="footer-link">
-                        <h4>Compañía</h4>
-                        <ul>
-                            <li><a href="#">Nosotros</a></li>
-                            <li><a href="#">Nuestros servicios</a></li>
-                            <li><a href="#">Síguenos</a></li>
-                            <li><a href="#">contáctanos</a></li>
-                            <li><a href="#">Política de privacidad</a></li>
-                        </ul>
-                    </div>
-                    <div class="footer-link">
-                        <h4>Ayudas</h4>
-                        <ul>
-                            <li><a href="#">Preguntas</a></li>
-                            <li><a href="#">Solicitudes</a></li>
-                            <li><a href="#">Citas</a></li>
-                            <li><a href="#">Pagos</a></li>
-                        </ul>
-                    </div>
-
-                    <div class="footer-link">
-                        <h4>Síguenos</h4>
-                        <div class="social-link">
-                            <a href="#"><i class="bi bi-instagram"></i></a>
-                            <a href="#"><i class="bi bi-twitter-x"></i></a>
-                            <a href="#"><i class="bi bi-facebook"></i></a>
-                        </div>
+                <div class="footer-link">
+                    <h4>Síguenos</h4>
+                    <div class="social-link">
+                        <a href="#"><i class="bi bi-instagram"></i></a>
+                        <a href="#"><i class="bi bi-twitter-x"></i></a>
+                        <a href="#"><i class="bi bi-facebook"></i></a>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="bg-secondary text-white text-center" style="height: 4rem;">
-                <p>&copy; 2023 ReparaDo! - Todos los derechos reservados</p>
-            </div>
-        </footer>
+        <div class="bg-secondary text-white text-center" style="height: 4rem;">
+            <p>&copy; 2023 ReparaDo! - Todos los derechos reservados</p>
+        </div>
+    </footer>
 
-        <script src="{% static 'reparado/js/jquery-3.7.1.min.js' %}"></script>
-        <script src="{% static 'reparado/js/bootstrap.bundle.min.js' %}"></script>
-        <script src="{% static 'reparado/js/DataTables/js/datatables.min.js' %}"></script>
-        <script src="{% static 'reparado/js/libreria.js' %}"></script>
-        <script src="{% static 'reparado/fullcalendar/dist/index.global.js' %}"></script>
-        <script>
-            $(document).ready(function () {
-                $("#dataTable").DataTable({
-                    language: {
-                        lengthMenu: "Mostrando _MENU_ registros por página",
-                        zeroRecords: "No se encontró nada - Lo sentimos",
-                        info: "Mostrando página _PAGE_ de _PAGES_",
-                        infoEmpty: "No hay registros existentes",
-                        infoFiltered: "(filtrado desde _MAX_ total records)",
-                        paginate: {
-                            next: "Próximo",
-                            previous: "Anterior",
-                        },
-                        search: "Buscar:",
+    <script src="{% static 'reparado/js/jquery-3.7.1.min.js' %}"></script>
+    <script src="{% static 'reparado/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'reparado/js/DataTables/js/datatables.min.js' %}"></script>
+    <script src="{% static 'reparado/js/libreria.js' %}"></script>
+    <script src="{% static 'reparado/fullcalendar/dist/index.global.js' %}"></script>
+    <script>
+        $(document).ready(function () {
+            $("#dataTable").DataTable({
+                language: {
+                    lengthMenu: "Mostrando _MENU_ registros por página",
+                    zeroRecords: "No se encontró nada - Lo sentimos",
+                    info: "Mostrando página _PAGE_ de _PAGES_",
+                    infoEmpty: "No hay registros existentes",
+                    infoFiltered: "(filtrado desde _MAX_ total records)",
+                    paginate: {
+                        next: "Próximo",
+                        previous: "Anterior",
                     },
-                });
+                    search: "Buscar:",
+                },
             });
+        });
+    </script>
+
+    <script src="{% static 'reparado/js/bootstrap.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js">
+    </script>
+    <script src="{% static 'reparado/js/custom.js' %}"></script>
+    <!--        <script>
+        var calendar;
+
+        document.addEventListener("DOMContentLoaded", function() {
+        	var today = new Date(); // Obtener la fecha actual
+        	var year = today.getFullYear(); // Obtener el año actual
+        	var month = today.getMonth() + 1; // Obtener el mes actual (los meses en JavaScript van de 0 a 11)
+        	var day = today.getDate(); // Obtener el día actual
+
+        	// Formatear la fecha actual en el formato YYYY-MM-DD
+        	var fechaActual = year + "-" + (month < 10 ? '0' : '') + month + "-" + (day < 10 ? '0' : '') + day;
+
+        	var calendarEl = document.getElementById("calendar");
+
+        	calendar = new FullCalendar.Calendar(calendarEl, {
+        	    themeSystem: 'standard',
+        		initialView: "dayGridMonth",
+        		initialDate: fechaActual,
+        		headerToolbar: {
+        			left: "prev,next today",
+        			center: "title",
+        			right: "dayGridMonth,timeGridWeek,timeGridDay",
+        		},
+
+        		events: [{{ solicitudes | safe | escape }}]
+
+        	});
+
+        	calendar.render();
+
+        });
         </script>
-    </body>
+
+        <script>
+        // script mejorado
+            var calendar;
+
+            document.addEventListener("DOMContentLoaded", function() {
+                var today = new Date(); // Obtener la fecha actual
+                var year = today.getFullYear(); // Obtener el año actual
+                var month = today.getMonth() + 1; // Obtener el mes actual (los meses en JavaScript van de 0 a 11)
+                var day = today.getDate(); // Obtener el día actual
+
+                // Formatear la fecha actual en el formato YYYY-MM-DD
+                var fechaActual = year + "-" + (month < 10 ? '0' : '') + month + "-" + (day < 10 ? '0' : '') + day;
+
+                var calendarEl = document.getElementById("calendar");
+
+                calendar = new FullCalendar.Calendar(calendarEl, {
+                    themeSystem: 'standard',
+                    initialView: "dayGridMonth",
+                    initialDate: fechaActual,
+                    headerToolbar: {
+                        left: "prev,next today",
+                        center: "title",
+                        right: "dayGridMonth,timeGridWeek,timeGridDay",
+                    },
+                    events: {{ solicitudes|safe }}
+                });
+
+                calendar.render();
+            });
+        </script>-->
+
+</body>
+
 </html>
