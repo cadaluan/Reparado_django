@@ -33,10 +33,10 @@ class Usuario(AbstractUser):
     token = models.CharField(max_length=10, null=True, blank=True)
     activo = models.BooleanField(default=True)
     objects = CustomUserManager()
+    fecha_registro = models.DateTimeField(default=timezone.now)
 
     ROLES = (
         ("ADMIN", "Administrador"),
-        ("SEC", "Secretaria"),
         ("TEC", "Técnico"),
         ("USU", "Usuario"),
     )
@@ -58,6 +58,7 @@ class Servicio(models.Model):
     tiempo_estimado = models.IntegerField(default=120)  # Tiempo en minutos
     foto = models.ImageField(upload_to="productos/", default="productos/default.png")
     objects = models.Manager()
+    fecha = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return self.nombre_ser
@@ -67,7 +68,7 @@ class Servicio(models.Model):
 
 
 class Solicitud(models.Model):
-    servicio = models.ForeignKey(Servicio, on_delete=models.CASCADE)
+    servicio = models.ForeignKey(Servicio, on_delete=models.CASCADE, related_name='solicitudes')
     fecha_hora = models.DateTimeField()
     precio = models.IntegerField()
     tiempo_estimado = models.IntegerField(default=120)  # Tiempo en minutos

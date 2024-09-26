@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 from rest_framework.documentation import include_docs_urls
 from rest_framework.authtoken.views import obtain_auth_token
 from .views import RegisterView
-
+from .views import admin_panel
 from . import views
 
 router = DefaultRouter()
@@ -33,7 +33,8 @@ urlpatterns = [
    
     path('api/1.0/register/', views.RegisterView.as_view(), name='register'),
 
-
+    # panel solo para el admin
+     path("administrador/", views.admin_panel, name="admin_panel"),
     # Inicio de sesión
     path('', views.index, name='index'),
     path("calendario/", views.calendario, name="calendario"),

@@ -23,6 +23,85 @@ from rest_framework.authtoken.views import ObtainAuthToken, APIView
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.db.models.functions import ExtractMonth  # Importa ExtractMonth
+from .models import Usuario, Servicio
+from django.db.models import Count,Sum
+from django.utils import formats
+
+
+# Decorador para verificar si el usuario es admin
+def is_admin(user):
+    return user.is_superuser or user.is_staff
+
+@login_required
+@user_passes_test(is_admin)
+
+
+def admin_panel(request):
+    if not request.user.is_superuser:
+        return redirect('index')
+
+    # Obtener todos los usuarios y servicios
+    usuarios = Usuario.objects.all()
+    servicios = Servicio.objects.all()
+
+    # Contar todos los usuarios
+    total_usuarios = Usuario.objects.count()
+    
+    # Contar solo los técnicos
+    total_tecnicos = Usuario.objects.filter(rol='TEC').count() 
+
+    # Contar solo los administradores
+    total_admin = Usuario.objects.filter(rol='ADMIN').count() 
+
+    # Contar solo los servicios
+    total_servicios = Servicio.objects.count()
+
+     # Calcular el total de ventas (sumando los montos de todas las facturas)
+    total_ventas = Factura.objects.aggregate(total=Sum('total'))['total'] or 0
+     # Formatear el total con el símbolo del peso colombiano
+    total_ventas_formateado = formats.localize(total_ventas)
+    
+    fecha_usuario = {}
+    for usuario in usuarios:
+       fecha = usuario.fecha_registro.date()  # Asegúrate de tener un campo fecha
+       if fecha in fecha_usuario:
+            fecha_usuario[fecha] += 1
+       else:
+            fecha_usuario[fecha] = 1
+
+    # Ordenar los datos por fecha
+    fechas = sorted(fecha_usuario.keys())
+    datos = [[str(fecha), fecha_usuario[fecha]] for fecha in fechas]
+
+
+     # Contar los servicios más utilizados
+    servicios_utilizados = {}
+    for servicio in servicios:
+        count = servicio.solicitudes.count()  # Usamos el related_name 'solicitudes' para contar
+        servicios_utilizados[servicio.nombre_ser] = count
+
+    # Preparar los datos para ECharts
+    labels_servicios = list(servicios_utilizados.keys())
+    data_servicios = list(servicios_utilizados.values())
+    # Renderizar la plantilla con los datos
+    context = {
+        'total_admin': total_admin,
+        'total_servicios': total_servicios,
+        'total_usuarios': total_usuarios,
+        'total_tecnicos': total_tecnicos,
+        'total_ventas': total_ventas_formateado,
+        'usuarios': usuarios,  # Asegúrate de que esta clave se use correctamente en tu plantilla
+        'servicios': servicios,  # Asegúrate de que esta clave se use correctamente en tu plantilla
+        'datos_grafico': json.dumps(datos),
+        'servicios_utilizados_labels': json.dumps(labels_servicios),  # Etiquetas para el gráfico de servicios
+        'servicios_utilizados_data': json.dumps(data_servicios),
+        
+    }
+
+    return render(request, 'reparado/admin/admin.html', context)
+
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
@@ -65,11 +144,14 @@ def login(request):
         username = request.POST.get("username")
         password = request.POST.get("password")
         try:
+            # Obtener el usuario
             q = Usuario.objects.get(username=username)
+            # Verificar la contraseña
             verify = verify_password(password, q.password)
             if verify:
                 messages.success(request, f"Bienvenido {q.username}")
-                # Crear la sesión...
+                
+                # Crear la sesión
                 request.session["logueo"] = {
                     "id": q.id,
                     "nombre": q.nombre,
@@ -79,7 +161,12 @@ def login(request):
                 request.session["carrito"] = []
                 request.session["items_carrito"] = 0
                 request.session["total_carrito"] = 0
-                return redirect("inicio")
+                
+                # Redirigir según el rol del usuario
+                if q.rol == 'ADMIN':  # Asegúrate de que 'admin' es el rol correcto para los administradores
+                    return redirect("admin_panel")  # Redirige al panel de administración
+                else:
+                    return redirect("inicio")  # Redirige a la página de inicio normal
             else:
                 raise Exception(verify)
         except Exception as e:
@@ -221,11 +308,13 @@ def registro(request):
 
     elif request.method == 'POST':
         username = request.POST.get("username").strip()
+        nombre = request.POST.get("nombre").strip()
+        apellido = request.POST.get("apellido").strip()
         password1 = request.POST.get("password1").strip()
         password2 = request.POST.get("password2").strip()
 
         # Validaciones
-        if not username or not password1 or not password2:
+        if not username or not nombre or not apellido or not password1 or not password2:
             messages.error(request, "Los campos no pueden estar vacíos")
             return redirect("index")
 
@@ -483,7 +572,7 @@ def servicios_crear(request):
             messages.success(request, "Servicio guardado exitosamente.")
         except Exception as e:
             messages.error(request, f"Error: {e}")
-        return redirect("servicios")
+        return redirect("admin_panel")
 
 
 @require_http_methods(["GET", "POST"])
@@ -524,7 +613,7 @@ def servicios_editar(request, id_servicio):
                 servicio.categoria = Categoria.objects.get(pk=categoria)
                 servicio.save()
                 messages.success(request, 'Datos actualizados con éxito!!!')
-                return redirect("servicios")
+                return redirect("admin_panel")
             except Exception as e:
                 messages.error(request, f"Se produjo un error: {e}")
 
@@ -541,11 +630,11 @@ def servicios_eliminar(request, id_servicio):
             # Procesa el formulario y actualiza la base de datos
             servicio.delete()
             messages.success(request, 'Servicio eliminado con éxito...')
-            return redirect("servicios")
+            return redirect("admin_panel")
     except Exception as e:
         messages.error(request, f"Error: {e}")
 
-    return redirect("servicios")
+    return redirect("admin_panel")
 
 
 def solicitudes(request):
@@ -807,7 +896,7 @@ def usuarios_crear(request):
                 )
                 q.save()
                 messages.success(request, "Usuario guardado exitosamente.")
-                return redirect("usuarios")
+                return redirect("admin_panel")
             except Exception as e:
                 messages.error(request, f"Error: {e}")
 
@@ -905,7 +994,7 @@ def usuarios_editar(request, id_usuario):
                 usuario.categorias.set(categorias_ids)
 
                 messages.success(request, 'Datos actualizados con éxito!!!')
-                return redirect("usuarios")
+                return redirect("admin_panel")
             except Exception as e:
                 messages.error(request, f"Se produjo un error: {e}")
     else:
@@ -937,12 +1026,12 @@ def usuarios_eliminar(request, id_usuario):
                 # Procesa el formulario y actualiza la base de datos
                 usuario.delete()
                 messages.success(request, 'Usuario eliminado con éxito...')
-                return redirect("usuarios")
+                return redirect("admin_panel")
             else:
                 messages.success(request, 'Usuario tiene la sesión activa...')
     except Exception as e:
         messages.error(request, f"Error: {e}")
-    return redirect("usuarios")
+    return redirect("admin_panel")
 
 
 # Carro de compras
